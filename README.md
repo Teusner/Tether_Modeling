@@ -6,6 +6,8 @@ This repository is the result of an introduction to research in the field of tet
 
 ## Compilation
 
-```bash
+To compile this document, use _compile.sh_ available in this repository.
 
+```bash
+./compile.sh
 ```
