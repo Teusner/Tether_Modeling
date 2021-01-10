@@ -1,0 +1,1 @@
+xelatex ./documentation/main.tex
