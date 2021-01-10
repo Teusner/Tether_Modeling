@@ -97,7 +97,7 @@ class Tether:
         self.ax_length.plot(self.t, length, label="link length")
         self.ax_length.plot(self.t, self.element_length*np.ones(self.t.shape), label="target length")
 
-        self.ax_length.set_title(r"Length of the ${}^t$ link".format(i))
+        self.ax_length.set_title(r"Length of the ${}th$ link".format(i+1))
         self.ax_length.grid()
         self.ax_length.set_xlabel(r"Time (in $s$)")
         self.ax_length.set_ylabel(r"Length (in $m$)")
@@ -133,6 +133,8 @@ class TetherElement:
         self.velocity = np.zeros((3, 1), dtype=np.float64)
         self.acceleration = np.array((3, 1), dtype=np.float64)
 
+        self.forces_mask = np.array(3*[[True, True, True, True, True]])
+
         self.mass = mass
         self.length = length
         self.volume = volume
@@ -141,7 +143,8 @@ class TetherElement:
 
     def step(self, h):
         if self.previous is not None and self.next is not None:
-            self.acceleration = np.clip(1 / self.mass * (self.Fg() + self.Fb() + self.Ft_prev() + self.Ft_next() - self.velocity*np.abs(self.velocity)), -1e5, 1e5)
+            forces = np.hstack((self.Fg(), self.Fb(), self.Ft_prev(),  self.Ft_next(), self.F_f()))
+            self.acceleration = np.clip(1 / self.mass * ((self.forces_mask * forces) @ np.ones((5, 1))), -1e5, 1e5)
             self.velocity += h * self.acceleration
             self.position += h * self.velocity
 
@@ -166,9 +169,12 @@ class TetherElement:
             u = (self.next.position - self.position) / lm
         return - self.kp * (self.length - lm) / self.length * u
 
+    def F_f(self):
+        return - self.velocity*np.abs(self.velocity)
+
 if __name__ == "__main__":
     T = Tether(25, 10)
     T.process(0, 50, 1/10)
     T.monitor_length(5)
-    T.simulate()
-    T.write_animation()
+    #T.simulate()
+    #T.write_animation()
