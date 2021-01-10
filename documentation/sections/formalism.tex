@@ -1,0 +1,7 @@
+The idea proposed in the scientific paper [1] is to solve this problem using finite element simulation. This implies that we need to discretize the tether in order to simulate its global behavior.
+
+Suppose we want to simulate a tether of length $L$. We will then divide it into a finite number $n$ of nodes connected by links. These links should be of length $l=\frac{L}{n-1}$ as the two nodes at the ends of the tether will not be connected to any other links.
+
+Next, it is necessary to make a balance of the forces that apply to each tether element. For this simulation, we will take into account the weight, noted $F_p$, the buoyancy, noted $F_b$, and the force exerted by the previous element on the considered element, noted $F_{t, previous}$, as well as that of the next element, noted $F_{t, next}$.
+
+These forces will allow us to simply describe the behavior of the tether in its environment. Moreover we could then improve the quality of the simulation by adding other forces such as forces related to a current for example.
