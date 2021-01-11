@@ -1,0 +1,38 @@
+As for the implementation, it is available in the same GitHub repository and offers a simulator coded in Python3. The goal of this simulator is to study the viability of such a system, in particular to validate the performance of the tether with this behavioral model.
+
+So we will create a class \textit{TetherElement} which will represent a node. It will have to contain its mass, volume and distance information from its neighbors, but also its position, velocity and acceleration, as well as a pointer to each of its two neighbors.
+
+This will allow us later on to implement a \textit{Tether} class to be able to simulate a tether. This object must have a length, a number of elements and a list containing the different \textit{TetherElement} that compose it. It must also know the mass, the volume of each node in order to correctly instantiate the \textit{TetherElement}, but also the length of each link between nodes.
+
+\begin{figure}
+    \centering
+    \begin{tikzpicture}
+        \begin{class}[text width=6cm]{Tether}{0,0}
+            \attribute{+ element\_mass : double}
+            \attribute{+ element\_volume : double}
+            \attribute{+ element\_length : double}
+            \attribute{+ position\_first : numpy.ndarray}
+            \attribute{+ position\_last : numpy.ndarray}
+            \attribute{+ elements : list of \textit{TetherElement}}
+        \end{class}
+    
+        \begin{class}[text width=6cm]{TetherElement}{0,7}
+            \attribute{+ mass : double}
+            \attribute{+ volume : double}
+            \attribute{+ length : double}
+            \attribute{+ position : numpy.ndarray}
+            \attribute{+ velocity : numpy.ndarray}
+            \attribute{+ acceleration : numpy.ndarray}
+            \attribute{+ previous : TetherElement}
+            \attribute{+ next : TetherElement}
+            \operation{+ F\_p(self) : numpy.ndarray}
+            \operation{+ F\_b(self) : numpy.ndarray}
+            \operation{+ Ft\_prev(self) : numpy.ndarray}
+            \operation{+ Ft\_next(self) : numpy.ndarray}
+        \end{class}
+    
+        \aggregation{Tether}{}{~~~n}{TetherElement}
+    \end{tikzpicture}
+    \caption{UML diagram of the implementation}
+    \label{fig:uml}
+\end{figure}

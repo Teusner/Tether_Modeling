@@ -2,14 +2,16 @@ The idea proposed in the scientific paper [1] is to solve this problem using fin
 
 Suppose we want to simulate a tether of length $L$. We will then divide it into a finite number $n$ of nodes connected by links. These links should be of length $l=\frac{L}{n-1}$ as the two nodes at the ends of the tether will not be connected to any other links.
 
-Next, it is necessary to make a balance of the forces that apply to each tether element. For this simulation, we will take into account the weight, noted $F_p$, the buoyancy, noted $F_b$, and the force exerted by the previous element on the considered element, noted $F_{t, previous}$, as well as that of the next element, noted $F_{t, next}$.
+We will focus here on the case where the first node and the last node are immobile, because otherwise we would have to simulate a mobile marine object that would be attached at the end, which is not the goal of our study.
+
+Next, it is necessary to make a balance of the forces that apply to each tether element. For this simulation, we will take into account the weight, noted $F_g$, the buoyancy, noted $F_b$, and the force exerted by the previous element on the considered element, noted $F_{t, previous}$, as well as that of the next element, noted $F_{t, next}$.
 
 These forces will allow us to simply describe the behavior of the tether in its environment. Moreover we could then improve the quality of the simulation by adding other forces such as forces related to a current for example.
 
-\subsection{Weight $F_p$}
+\subsection{Weight $F_g$}
 Considering that each element has a mass $m$, we are able to express the weight that applies to this node :
 
-$$\overrightarrow{F_p} = \begin{bmatrix}0\\ 0\\ -m.g\end{bmatrix}$$
+$$\overrightarrow{F_g} = \begin{bmatrix}0\\ 0\\ -m.g\end{bmatrix}$$
 
 \subsection{Buoyancy $F_b$}
 If we note the volume of each element $V$ and $\rho$ the density of the fluid in which the tether is immersed, we can also express the buoyancy force of this node:
@@ -20,8 +22,8 @@ $$\overrightarrow{F_b} = \begin{bmatrix}0\\ 0\\ \rho.V.g\end{bmatrix}$$
 
 It is difficult to find an analytical form to describe these two forces. Therefore, we must find a way to describe these forces in order to simulate the tether correctly. This is why we will use a behavioral model here. We know that each node will have to be at a distance $l$ from each of its neighbors. We can assume that the system behaves here as a three-dimensional mass-spring system and we will then consider that these forces are like elastic spring forces.
 
-By noting then $p_{previous}$ the position of the previous node, $p_{current}$ the position of the current node and $p_{next}$ the position of the next node, by introducing a coefficient $K_p$ allowing to express the stiffness with which a node will correct its position with respect to its neighbors, we are able to express the behavioral model of these two forces:
+By noting then $p_{p}$ the position of the previous node, $p_{c}$ the position of the current node and $p_{n}$ the position of the next node, by introducing a coefficient $K_p$ allowing to express the stiffness with which a node will correct its position with respect to its neighbors, we are able to express the behavioral model of these two forces:
 
-$$\overrightarrow{F_{t, previous}} = -K_p.\left(\|p_{current} - p_{previous}\| - l\right)$$
+$$\overrightarrow{F_{t, previous}} = -K_p.\left(\|p_p - p_c\| - l\right).\frac{\overrightarrow{p_p - p_c}}{\|p_c - p_p\|}$$
 
-$$\overrightarrow{F_{t, next}} = -K_p.\left(\|p_{next} - p_{current}\| - l\right)$$
+$$\overrightarrow{F_{t, next}} = -K_p.\left(\|p_n - p_p\| - l\right).\frac{\overrightarrow{p_n - p_p}}{\|p_n - p_p\|}$$
