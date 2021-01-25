@@ -173,8 +173,8 @@ class TetherElement:
         return - self.velocity*np.abs(self.velocity)
 
 if __name__ == "__main__":
-    T = Tether(25, 10)
-    T.process(0, 50, 1/10)
+    T = Tether(25, 15)
+    T.process(0, 50, 1/25)
     T.monitor_length(5)
-    #T.simulate()
+    T.simulate()
     #T.write_animation()
