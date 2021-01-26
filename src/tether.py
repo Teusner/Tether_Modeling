@@ -118,7 +118,28 @@ class Tether:
         self.ax_length.set_ylabel(r"Length (in $m$)")
         self.ax_length.set_xlim(self.t0, self.tf)
         self.ax_length.legend()
-        plt.show()
+
+    def monitor_length_error(self):
+        # Creating a plot
+        self.fig_length_error, self.ax_length_error = plt.subplots()
+
+        self.total_length = []
+
+        for i in range(1, self.n-1):
+                self.total_length.append(np.linalg.norm(self.S[:, :, i+1]-self.S[:, :, i], axis=1))
+        
+        self.total_length = np.asarray(self.total_length)
+
+        m = np.mean(self.total_length, axis=0)
+        relative_error = 100*(m - self.element_length*np.ones(self.t.shape))/self.element_length*np.ones(self.t.shape)
+        self.ax_length_error.fill_between(self.t, np.zeros(self.t.shape), relative_error, color="crimson", alpha=0.4)
+        self.ax_length_error.plot(self.t, relative_error, color="crimson")
+    
+        self.ax_length_error.set_title("Relative error between the target length and the mean length of links")
+        self.ax_length_error.grid()
+        self.ax_length_error.set_xlabel(r"Time (in $s$)")
+        self.ax_length_error.set_ylabel("Relative error (in %)")
+        self.ax_length_error.set_xlim(self.t0, self.tf)
 
     def monitor_kinetic_energy(self):
         # Creating a plot
@@ -233,6 +254,7 @@ if __name__ == "__main__":
     # T.monitor_kinetic_energy()
     # T.monitor_energy()
     T.monitor_length()
+    T.monitor_length_error()
     plt.show()
     # T.simulate()
     # T.write_animation()
