@@ -3,19 +3,21 @@ import matplotlib.pyplot as plt
 #from mpl_toolkits import mplot3d
 from mpl_toolkits.mplot3d import Axes3D
 import mpl_toolkits.mplot3d.axes3d as p3
-import matplotlib.animation as animation 
+import matplotlib.animation as animation
 
+from tether_element import TetherElement
 
-g = 9.81
-rho = 1000
 
 class Tether:
     def __init__(self, L, n):
+        # Tether parameters
         self.n = n
         self.L = L
 
+        # List of TetherElements
         self.elements = []
 
+        # TetherElements parameters
         self.element_length = self.L / (self.n - 1)
         self.element_mass = 0.1 * self.element_length
         self.element_volume = np.pi*0.005**2*self.element_length
@@ -24,7 +26,7 @@ class Tether:
         self.position_first = np.array([[0.], [0.], [0.]])
         self.position_last = np.array([[10.], [0.], [10.]])
 
-        # Chaining elements
+        # Initialise random positions for each TetherElements
         for i in range(n):
             xe = i * (self.position_last[0] - self.position_first[0]) / n
             ye = i * (self.position_last[1] - self.position_first[1]) / n
@@ -32,6 +34,7 @@ class Tether:
             position = np.array([xe, ye, ze]) + np.random.randn(3, 1)
             self.elements.append(TetherElement(self.element_mass, self.element_length, self.element_volume, position))
         
+        # Chaining elements
         for i in range(1, n-1):
             self.elements[i].previous = self.elements[i-1]
             self.elements[i].next = self.elements[i+1]
@@ -42,9 +45,10 @@ class Tether:
     def __str__(self):
         res = ""
         for i, e in enumerate(self.elements):
-            res += "Element {:d} : \n".format(i)
-            res += "\t Prev \t : {} \n".format(e.previous)
-            res += "\t Next \t : {} \n".format(e.next)
+            # res += "Element {:d} : \n".format(i)
+            # res += "\t Prev \t : {} \n".format(e.previous)
+            # res += "\t Next \t : {} \n".format(e.next)
+            res += str(e)
         return res
 
     def step(self, h):
@@ -88,23 +92,121 @@ class Tether:
         writer = Writer(fps=int(1/self.h), metadata=dict(artist='Me'), bitrate=1800)
         self.ani.save('tether.mp4', writer=writer)
 
-    def monitor_length(self, i):
+    def monitor_length(self):
         # Creating a plot
         self.fig_length, self.ax_length = plt.subplots()
 
-        # Showing the length of the ith link
-        length = np.linalg.norm(self.S[:, :, i+1]-self.S[:, :, i], axis=1)
-        self.ax_length.plot(self.t, length, label="link length")
-        self.ax_length.plot(self.t, self.element_length*np.ones(self.t.shape), label="target length")
+        self.total_length = []
 
-        self.ax_length.set_title(r"Length of the ${}th$ link".format(i+1))
+        for i in range(1, self.n-1):
+                self.total_length.append(np.linalg.norm(self.S[:, :, i+1]-self.S[:, :, i], axis=1))
+        
+        self.total_length = np.asarray(self.total_length)
+        self.ax_length.plot(self.t, self.total_length.T, color="grey")
+
+        m, std = np.mean(self.total_length, axis=0), np.std(self.total_length, axis=0)
+        self.ax_length.fill_between(self.t, m - 3*std, m + 3*std, facecolor='teal', alpha=0.4, label=r"$3.\sigma$ area")
+        self.ax_length.plot(self.t, m, color="crimson", linewidth=3, label="mean of lengths")
+        self.ax_length.plot(self.t, m - 3*std, color="teal", linewidth=2)
+        self.ax_length.plot(self.t, m + 3*std, color="teal", linewidth=2)
+
+        self.ax_length.plot(self.t, self.element_length*np.ones(self.t.shape), color="orange", label="target length", linewidth=2)
+
+        self.ax_length.set_title("Length of the links")
         self.ax_length.grid()
         self.ax_length.set_xlabel(r"Time (in $s$)")
         self.ax_length.set_ylabel(r"Length (in $m$)")
         self.ax_length.set_xlim(self.t0, self.tf)
-        #self.ax_length.set_ylim(0)
         self.ax_length.legend()
         plt.show()
+
+    def monitor_kinetic_energy(self):
+        # Creating a plot
+        self.fig_ek, self.ax_ek = plt.subplots()
+
+        self.total_ek = []
+
+        # Showing energy of each nodes
+        for e in self.elements:
+            if e.previous is not None and e.next is not None:
+                self.total_ek.append(e.Ek[1:])
+
+        self.total_ek = np.asarray(self.total_ek)
+        self.ax_ek.plot(self.t, self.total_ek.T, color="grey")
+
+        m, std = np.mean(self.total_ek, axis=0), np.std(self.total_ek, axis=0)
+        self.ax_ek.fill_between(self.t, m - 3*std, m + 3*std, facecolor='teal', alpha=0.4, label=r"$3.\sigma$ area")
+        self.ax_ek.plot(self.t, m, color="crimson", linewidth=3, label="mean of potential energy")
+        self.ax_ek.plot(self.t, m - 3*std, color="teal", linewidth=2)
+        self.ax_ek.plot(self.t, m + 3*std, color="teal", linewidth=2)
+
+        self.ax_ek.set_title("Kinetic Energy")
+        self.ax_ek.grid()
+        self.ax_ek.set_xlabel(r"Time (in $s$)")
+        self.ax_ek.set_ylabel(r"Energy")
+        self.ax_ek.set_xlim(self.t0, self.tf)
+        self.ax_ek.set_ylim(-0.2, 0.2)
+        self.ax_ek.legend()
+
+    def monitor_potential_energy(self):
+        # Creating a plot
+        self.fig_ep, self.ax_ep = plt.subplots()
+
+        self.total_ep = []
+
+        # Showing energy of each nodes
+        for e in self.elements:
+            if e.previous is not None and e.next is not None:
+                self.total_ep.append(e.Ep[1:])
+
+        self.total_ep = np.asarray(self.total_ep)
+        self.ax_ep.plot(self.t, self.total_ep.T, color="grey")
+
+        m, std = np.mean(self.total_ep, axis=0), np.std(self.total_ep, axis=0)
+        self.ax_ep.fill_between(self.t, m - 3*std, m + 3*std, facecolor='teal', alpha=0.4, label=r"$3.\sigma$ area")
+        self.ax_ep.plot(self.t, m, color="crimson", linewidth=3, label="mean of potential energy")
+        self.ax_ep.plot(self.t, m - 3*std, color="teal", linewidth=2)
+        self.ax_ep.plot(self.t, m + 3*std, color="teal", linewidth=2)
+
+        self.ax_ep.set_title("Potential Energy")
+        self.ax_ep.grid()
+        self.ax_ep.set_xlabel(r"Time (in $s$)")
+        self.ax_ep.set_ylabel(r"Energy")
+        self.ax_ep.set_xlim(self.t0, self.tf)
+        self.ax_ep.legend()
+
+    def monitor_energy(self):
+        # Creating a plot
+        self.fig_energy, self.ax_energy = plt.subplots()
+
+        self.total_ek = []
+        self.total_ep = []
+
+        # Showing energy of each nodes
+        for e in self.elements:
+            if e.previous is not None and e.next is not None:
+                self.total_ek.append(e.Ek[1:])
+                self.total_ep.append(e.Ep[1:])
+
+        self.total_ek = np.asarray(self.total_ek)
+        self.total_ep = np.asarray(self.total_ep)
+
+        self.energy = self.total_ek + self.total_ep
+        
+        self.ax_energy.plot(self.t, self.energy.T, color="grey")
+
+        m, std = np.mean(self.energy, axis=0), np.std(self.energy, axis=0)
+        self.ax_energy.fill_between(self.t, m - 3*std, m + 3*std, facecolor='teal', alpha=0.4, label=r"$3.\sigma$ area")
+        self.ax_energy.plot(self.t, m, color="crimson", linewidth=3, label="mean of potential energy")
+        self.ax_energy.plot(self.t, m - 3*std, color="teal", linewidth=2)
+        self.ax_energy.plot(self.t, m + 3*std, color="teal", linewidth=2)
+
+        self.ax_energy.set_title("Energy")
+        self.ax_energy.grid()
+        self.ax_energy.set_xlabel(r"Time (in $s$)")
+        self.ax_energy.set_ylabel(r"Energy")
+        self.ax_energy.set_xlim(self.t0, self.tf)
+        self.ax_energy.legend()
     
     def animate(self, i): 
         self.ax.clear() 
@@ -124,57 +226,13 @@ class Tether:
             self.ax.scatter3D(self.S[i, 0, k], self.S[i, 1, k], self.S[i, 2, k], color=col)
 
 
-class TetherElement:
-    def __init__(self, mass, length, volume, position):
-        self.previous = None
-        self.next = None
-
-        self.position = position
-        self.velocity = np.zeros((3, 1), dtype=np.float64)
-        self.acceleration = np.array((3, 1), dtype=np.float64)
-
-        self.forces_mask = np.array(3*[[True, True, True, True, True]])
-
-        self.mass = mass
-        self.length = length
-        self.volume = volume
-
-        self.kp = 10
-
-    def step(self, h):
-        if self.previous is not None and self.next is not None:
-            forces = np.hstack((self.Fg(), self.Fb(), self.Ft_prev(),  self.Ft_next(), self.F_f()))
-            self.acceleration = np.clip(1 / self.mass * ((self.forces_mask * forces) @ np.ones((5, 1))), -1e5, 1e5)
-            self.velocity += h * self.acceleration
-            self.position += h * self.velocity
-
-    def Fg(self):
-        return np.array([[0], [0], [self.mass * g]])
-
-    def Fb(self) :
-        '''
-        To be replaced with Omega which return the volume of the immerged tether element which is not always the complete volume
-        '''
-        return np.array([[0], [0], [- rho * self.volume * g]])
-
-    def Ft_prev(self):
-        if self.previous is not None:
-            lm = np.linalg.norm(self.position - self.previous.position)
-            u = (self.previous.position - self.position) / lm
-            return - self.kp * (self.length - lm) / self.length * u
-
-    def Ft_next(self):
-        if self.next is not None:
-            lm = np.linalg.norm(self.next.position - self.position)
-            u = (self.next.position - self.position) / lm
-        return - self.kp * (self.length - lm) / self.length * u
-
-    def F_f(self):
-        return - self.velocity*np.abs(self.velocity)
-
 if __name__ == "__main__":
     T = Tether(25, 15)
     T.process(0, 50, 1/25)
-    T.monitor_length(5)
-    T.simulate()
-    #T.write_animation()
+    # T.monitor_potential_energy()
+    # T.monitor_kinetic_energy()
+    # T.monitor_energy()
+    T.monitor_length()
+    plt.show()
+    # T.simulate()
+    # T.write_animation()
