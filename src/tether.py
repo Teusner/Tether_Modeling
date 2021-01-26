@@ -250,9 +250,9 @@ class Tether:
 if __name__ == "__main__":
     T = Tether(25, 15)
     T.process(0, 50, 1/25)
-    # T.monitor_potential_energy()
-    # T.monitor_kinetic_energy()
-    # T.monitor_energy()
+    T.monitor_potential_energy()
+    T.monitor_kinetic_energy()
+    T.monitor_energy()
     T.monitor_length()
     T.monitor_length_error()
     plt.show()
