@@ -256,5 +256,6 @@ if __name__ == "__main__":
     T.monitor_length()
     T.monitor_length_error()
     plt.show()
-    # T.simulate()
-    # T.write_animation()
+    
+    T.simulate()
+    T.write_animation()

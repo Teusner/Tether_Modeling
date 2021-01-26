@@ -31,7 +31,7 @@ class TetherElement:
         self.acceleration_limit = 1e4
 
         # Coefficient for the comportemental model
-        self.kp = 10
+        self.kp = 30
 
     def __str__(self):
         res = "TetherElement : {} \n".format(self.uuid)
