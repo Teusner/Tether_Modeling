@@ -23,15 +23,15 @@ class Tether:
         self.element_volume = np.pi*0.005**2*self.element_length
 
         # Extremities
-        self.position_first = np.array([[0.], [0.], [0.]])
-        self.position_last = np.array([[10.], [0.], [10.]])
+        self.position_first = np.array([[5.], [0.], [5.]])
+        self.position_last = np.array([[15.], [0.], [-5.]])
 
         # Initialise random positions for each TetherElements
         for i in range(n):
             xe = i * (self.position_last[0] - self.position_first[0]) / n
             ye = i * (self.position_last[1] - self.position_first[1]) / n
             ze = i * (self.position_last[2] - self.position_first[2]) / n
-            position = np.array([xe, ye, ze]) + np.random.randn(3, 1)
+            position = np.array([xe, ye, ze]) #+ np.random.randn(3, 1)
             self.elements.append(TetherElement(self.element_mass, self.element_length, self.element_volume, position))
         
         # Chaining elements
@@ -44,10 +44,7 @@ class Tether:
 
     def __str__(self):
         res = ""
-        for i, e in enumerate(self.elements):
-            # res += "Element {:d} : \n".format(i)
-            # res += "\t Prev \t : {} \n".format(e.previous)
-            # res += "\t Next \t : {} \n".format(e.next)
+        for e in self.elements:
             res += str(e)
         return res
 
@@ -89,8 +86,8 @@ class Tether:
     
     def write_animation(self):
         Writer = animation.writers['ffmpeg']
-        writer = Writer(fps=int(1/self.h), metadata=dict(artist='Me'), bitrate=1800)
-        self.ani.save('tether.mp4', writer=writer)
+        writer = Writer(fps=int(1/self.h), metadata=dict(artist='Me'), bitrate=1800, codec="libx264")
+        self.ani.save('tether_4.mp4', writer=writer)
 
     def monitor_length(self):
         # Creating a plot
@@ -119,6 +116,9 @@ class Tether:
         self.ax_length.set_xlim(self.t0, self.tf)
         self.ax_length.legend()
 
+        mngr = plt.get_current_fig_manager()
+        mngr.window.setGeometry(0, 0, 600, 450)
+
     def monitor_length_error(self):
         # Creating a plot
         self.fig_length_error, self.ax_length_error = plt.subplots()
@@ -140,6 +140,9 @@ class Tether:
         self.ax_length_error.set_xlabel(r"Time (in $s$)")
         self.ax_length_error.set_ylabel("Relative error (in %)")
         self.ax_length_error.set_xlim(self.t0, self.tf)
+
+        mngr = plt.get_current_fig_manager()
+        mngr.window.setGeometry(600, 0, 800, 450)
 
     def monitor_kinetic_energy(self):
         # Creating a plot
@@ -231,16 +234,16 @@ class Tether:
     
     def animate(self, i): 
         self.ax.clear() 
-        self.ax.set_xlim3d(0, 12)
-        self.ax.set_ylim3d(-6, 6)
-        self.ax.set_zlim3d(0, 12)
+        self.ax.set_xlim3d(0, 20)
+        self.ax.set_ylim3d(-10, 10)
+        self.ax.set_zlim3d(-15, 5)
                     
         self.ax.plot3D(self.S[i, 0], self.S[i, 1], self.S[i, 2], color="teal")
 
         for k in range(self.n):
             if k == 0:
                 col = "purple"
-            elif k == self.n-1 is None:
+            elif k == self.n-1:
                 col = "gold"
             else:
                 col = "crimson"
@@ -249,10 +252,10 @@ class Tether:
 
 if __name__ == "__main__":
     T = Tether(25, 15)
-    T.process(0, 50, 1/25)
-    T.monitor_potential_energy()
-    T.monitor_kinetic_energy()
-    T.monitor_energy()
+    T.process(0, 100, 1/20)
+    # T.monitor_potential_energy()
+    # T.monitor_kinetic_energy()
+    # T.monitor_energy()
     T.monitor_length()
     T.monitor_length_error()
     plt.show()
