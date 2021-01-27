@@ -31,16 +31,16 @@ class TetherElement:
         self.acceleration_limit = 1e4
 
         # Coefficient for the behavioral model
-        self.kp = 28.
-        self.kd = 0.4
-        self.ki = 5
+        self.kp = 200
+        self.kd = 3.5
+        self.ki = 3
         self.previous_length = 0.
         self.next_length = 0.
         self.previous_int = 0.
         self.next_int = 0.
 
         # Proportionnal resistant torque
-        self.Tp = 75.
+        self.Tp = 50.
 
     def __str__(self):
         res = "TetherElement : {} \n".format(self.uuid)
@@ -97,8 +97,8 @@ class TetherElement:
 
     def Fs(self):
         if self.next is not None and self.previous is not None:
-            u_previous = (self.previous.position - self.position) / np.linalg.norm(self.previous.position - self.position)
-            u_next = (self.next.position - self.position) / np.linalg.norm(self.next.position - self.position)
+            u_previous = self.previous.position - self.position
+            u_next = self.next.position - self.position
 
             v = (u_previous + u_next) / 2
             return self.Tp * v

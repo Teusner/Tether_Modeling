@@ -19,7 +19,7 @@ class Tether:
 
         # TetherElements parameters
         self.element_length = self.L / (self.n - 1)
-        self.element_mass = 0.1 * self.element_length
+        self.element_mass = 5 * self.element_length
         self.element_volume = np.pi*0.005**2*self.element_length
 
         # Extremities
@@ -87,7 +87,7 @@ class Tether:
     def write_animation(self):
         Writer = animation.writers['ffmpeg']
         writer = Writer(fps=int(1/self.h), metadata=dict(artist='Me'), bitrate=1800, codec="libx264")
-        self.ani.save('tether.mp4', writer=writer)
+        self.ani.save('tether_9.mp4', writer=writer)
 
     def monitor_length(self):
         # Creating a plot
@@ -143,6 +143,36 @@ class Tether:
 
         mngr = plt.get_current_fig_manager()
         mngr.window.setGeometry(600, 0, 800, 450)
+
+    def monitor_angle(self):
+        # Creating a plot
+        self.fig_length, self.ax_length = plt.subplots()
+
+        self.total_length = []
+
+        for i in range(1, self.n-1):
+                self.total_length.append(np.linalg.norm(self.S[:, :, i+1]-self.S[:, :, i], axis=1))
+        
+        self.total_length = np.asarray(self.total_length)
+        self.ax_length.plot(self.t, self.total_length.T, color="grey")
+
+        m, std = np.mean(self.total_length, axis=0), np.std(self.total_length, axis=0)
+        self.ax_length.fill_between(self.t, m - 3*std, m + 3*std, facecolor='teal', alpha=0.4, label=r"$3.\sigma$ area")
+        self.ax_length.plot(self.t, m, color="crimson", linewidth=3, label="mean of lengths")
+        self.ax_length.plot(self.t, m - 3*std, color="teal", linewidth=2)
+        self.ax_length.plot(self.t, m + 3*std, color="teal", linewidth=2)
+
+        self.ax_length.plot(self.t, self.element_length*np.ones(self.t.shape), color="orange", label="target length", linewidth=2)
+
+        self.ax_length.set_title("Length of the links")
+        self.ax_length.grid()
+        self.ax_length.set_xlabel(r"Time (in $s$)")
+        self.ax_length.set_ylabel(r"Length (in $m$)")
+        self.ax_length.set_xlim(self.t0, self.tf)
+        self.ax_length.legend()
+
+        mngr = plt.get_current_fig_manager()
+        mngr.window.setGeometry(0, 0, 600, 450)
 
     def monitor_kinetic_energy(self):
         # Creating a plot
@@ -261,5 +291,5 @@ if __name__ == "__main__":
     plt.show()
     
     T.simulate()
-    plt.show()
-    #T.write_animation()
+    # plt.show()
+    T.write_animation()
