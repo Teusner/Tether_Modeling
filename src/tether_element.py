@@ -27,17 +27,20 @@ class TetherElement:
         self.Ep = [0.]
 
         # Mask to use forces
-        self.forces_mask = np.array([True, True, True, True, True])
+        self.forces_mask = np.array([True, True, True, True, True, True])
         self.acceleration_limit = 1e4
 
         # Coefficient for the behavioral model
-        self.kp = 7.
-        self.kd = 0.1
-        self.ki = 1.
+        self.kp = 28.
+        self.kd = 0.4
+        self.ki = 5
         self.previous_length = 0.
         self.next_length = 0.
         self.previous_int = 0.
         self.next_int = 0.
+
+        # Proportionnal resistant torque
+        self.Tp = 75.
 
     def __str__(self):
         res = "TetherElement : {} \n".format(self.uuid)
@@ -52,8 +55,8 @@ class TetherElement:
 
     def step(self, h):
         if self.previous is not None and self.next is not None:
-            forces = np.hstack((self.Fg(), self.Fb(), self.Ft_prev(h),  self.Ft_next(h), self.F_f()))
-            self.acceleration = np.clip(1 / self.mass * ((forces[:, self.forces_mask]) @ np.ones((5, 1))), -self.acceleration_limit, self.acceleration_limit)
+            forces = np.hstack((self.Fg(), self.Fb(), self.Ft_prev(h),  self.Ft_next(h), self.Ff(), self.Fs()))
+            self.acceleration = np.clip(1 / self.mass * ((forces[:, self.forces_mask]) @ np.ones((6, 1))), -self.acceleration_limit, self.acceleration_limit)
             self.velocity += h * self.acceleration
             self.position += h * self.velocity
 
@@ -89,11 +92,21 @@ class TetherElement:
         else :
             return np.zeros((3, 1))
 
-    def F_f(self):
+    def Ff(self):
         return - self.velocity*np.abs(self.velocity)
 
+    def Fs(self):
+        if self.next is not None and self.previous is not None:
+            u_previous = (self.previous.position - self.position) / np.linalg.norm(self.previous.position - self.position)
+            u_next = (self.next.position - self.position) / np.linalg.norm(self.next.position - self.position)
+
+            v = (u_previous + u_next) / 2
+            return self.Tp * v
+        else :
+            return np.zeros((3, 1))
+
     def dW(self, h):
-        W = self.velocity.T @ np.hstack((self.Fg(), self.Fb(), self.Ft_prev(h), self.Ft_next(h), self.F_f()))
+        W = self.velocity.T @ np.hstack((self.Fg(), self.Fb(), self.Ft_prev(h), self.Ft_next(h), self.Ff(), self.Fs()))
         return np.sum(h * W)
 
 

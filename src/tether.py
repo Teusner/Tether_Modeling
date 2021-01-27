@@ -23,8 +23,8 @@ class Tether:
         self.element_volume = np.pi*0.005**2*self.element_length
 
         # Extremities
-        self.position_first = np.array([[5.], [0.], [5.]])
-        self.position_last = np.array([[15.], [0.], [-5.]])
+        self.position_first = np.array([[12.], [0.], [5.]])
+        self.position_last = np.array([[15.], [0.], [0.]])
 
         # Initialise random positions for each TetherElements
         for i in range(n):
@@ -87,7 +87,7 @@ class Tether:
     def write_animation(self):
         Writer = animation.writers['ffmpeg']
         writer = Writer(fps=int(1/self.h), metadata=dict(artist='Me'), bitrate=1800, codec="libx264")
-        self.ani.save('tether_4.mp4', writer=writer)
+        self.ani.save('tether.mp4', writer=writer)
 
     def monitor_length(self):
         # Creating a plot
@@ -252,7 +252,7 @@ class Tether:
 
 if __name__ == "__main__":
     T = Tether(25, 15)
-    T.process(0, 100, 1/20)
+    T.process(0, 45, 1/20)
     # T.monitor_potential_energy()
     # T.monitor_kinetic_energy()
     # T.monitor_energy()
@@ -261,4 +261,5 @@ if __name__ == "__main__":
     plt.show()
     
     T.simulate()
-    T.write_animation()
+    plt.show()
+    #T.write_animation()
