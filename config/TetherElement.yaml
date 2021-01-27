@@ -1,0 +1,19 @@
+# TetherElement configuration file to define parameters
+
+# TetherElement parameters
+TetherElement:
+  mass: 1
+  length: 1
+  volume: 1
+
+# Length coefficients for links
+Length:
+  Kp: 1.0
+  Kd: 1.0
+  Ki: 1.0
+
+# Torque coefficients for rigidity
+Torque:
+  Kp: 1.0
+  Kd: 1.0
+  Ki: 1.0
