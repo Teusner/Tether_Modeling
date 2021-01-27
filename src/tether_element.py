@@ -1,5 +1,6 @@
 import numpy as np
 import uuid
+import yaml
 
 class TetherElement:
     # Physical constants of the system
@@ -52,6 +53,11 @@ class TetherElement:
         next_uuid = ("None" if self.next is None else str(self.next.uuid))
         res += "\t Next \t : {} \n".format(next_uuid)
         return res
+    
+    def load_parameters(self, filename):
+        with open(filename) as f:
+            data = yaml.load(f)
+            print(data["Length"])
 
     def step(self, h):
         if self.previous is not None and self.next is not None:
@@ -117,3 +123,5 @@ if __name__ == "__main__":
     t2.previous = t1
     print(t1)
     print(t2)
+
+    t1.load_parameters("./config/TetherElement.yaml")
