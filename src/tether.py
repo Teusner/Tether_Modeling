@@ -75,153 +75,144 @@ class Tether:
 
         self.ani = animation.FuncAnimation(self.fig, self.animate, frames=int((self.tf-self.t0)/self.h), interval=int(1/self.h), blit=False, repeat=False)
     
-    def show(self):
-        plt.show()
-    
     def write_animation(self):
         Writer = animation.writers['ffmpeg']
         writer = Writer(fps=int(1/self.h), metadata=dict(artist='Me'), bitrate=1800, codec="libx264")
-        self.ani.save('tether_9.mp4', writer=writer)
+        self.ani.save('tether_1.mp4', writer=writer)
 
     def monitor_length(self):
-        # Creating a plot
-        self.fig_length, self.ax_length = plt.subplots()
+        _, ax_length = plt.subplots()
+        total_length = []
 
-        self.total_length = []
-
-        for i in range(1, self.n-1):
-                self.total_length.append(np.linalg.norm(self.S[:, :, i+1]-self.S[:, :, i], axis=1))
+        for e in self.elements:
+            if e.next is not None:
+                total_length.append(np.linalg.norm(np.asarray(e.next.position)[:-1] - np.asarray(e.position)[:-1], axis=1))
         
-        self.total_length = np.asarray(self.total_length)
-        self.ax_length.plot(self.t, self.total_length.T, color="grey")
+        total_length = np.squeeze(np.asarray(total_length))
+        ax_length.plot(self.t, total_length.T, color="grey")
 
-        m, std = np.mean(self.total_length, axis=0), np.std(self.total_length, axis=0)
-        self.ax_length.fill_between(self.t, m - 3*std, m + 3*std, facecolor='teal', alpha=0.4, label=r"$3.\sigma$ area")
-        self.ax_length.plot(self.t, m, color="crimson", linewidth=3, label="mean of lengths")
-        self.ax_length.plot(self.t, m - 3*std, color="teal", linewidth=2)
-        self.ax_length.plot(self.t, m + 3*std, color="teal", linewidth=2)
+        m, std = np.mean(total_length, axis=0), np.std(total_length, axis=0)
+        ax_length.fill_between(self.t, m - 3*std, m + 3*std, facecolor='teal', alpha=0.4, label=r"$3.\sigma$ area")
+        ax_length.plot(self.t, m, color="crimson", linewidth=3, label="mean of lengths")
+        ax_length.plot(self.t, m - 3*std, color="teal", linewidth=2)
+        ax_length.plot(self.t, m + 3*std, color="teal", linewidth=2)
 
-        self.ax_length.plot(self.t, self.element_length*np.ones(self.t.shape), color="orange", label="target length", linewidth=2)
+        ax_length.plot(self.t, self.element_length*np.ones(self.t.shape), color="orange", label="target length", linewidth=2)
 
-        self.ax_length.set_title("Length of the links")
-        self.ax_length.grid()
-        self.ax_length.set_xlabel(r"Time (in $s$)")
-        self.ax_length.set_ylabel(r"Length (in $m$)")
-        self.ax_length.set_xlim(self.t0, self.tf)
-        self.ax_length.legend()
+        ax_length.set_title("Length of the links")
+        ax_length.grid()
+        ax_length.set_xlabel(r"Time (in $s$)")
+        ax_length.set_ylabel(r"Length (in $m$)")
+        ax_length.set_xlim(self.t0, self.tf)
+        ax_length.legend()
 
         mngr = plt.get_current_fig_manager()
         mngr.window.setGeometry(0, 0, 600, 450)
 
     def monitor_length_error(self):
-        # Creating a plot
-        self.fig_length_error, self.ax_length_error = plt.subplots()
+        _, ax_length_error = plt.subplots()
+        total_length = []
 
-        self.total_length = []
-
-        for i in range(1, self.n-1):
-                self.total_length.append(np.linalg.norm(self.S[:, :, i+1]-self.S[:, :, i], axis=1))
+        for e in self.elements:
+            if e.next is not None:
+                total_length.append(np.linalg.norm(np.asarray(e.next.position)[:-1] - np.asarray(e.position)[:-1], axis=1))
         
-        self.total_length = np.asarray(self.total_length)
+        total_length = np.squeeze(np.asarray(total_length))
 
-        m = np.mean(self.total_length, axis=0)
+        m = np.mean(total_length, axis=0)
         relative_error = 100*(m - self.element_length*np.ones(self.t.shape))/self.element_length*np.ones(self.t.shape)
-        self.ax_length_error.fill_between(self.t, np.zeros(self.t.shape), relative_error, color="crimson", alpha=0.4)
-        self.ax_length_error.plot(self.t, relative_error, color="crimson")
+        ax_length_error.fill_between(self.t, np.zeros(self.t.shape), relative_error, color="crimson", alpha=0.4)
+        ax_length_error.plot(self.t, relative_error, color="crimson")
     
-        self.ax_length_error.set_title("Relative error between the target length and the mean length of links")
-        self.ax_length_error.grid()
-        self.ax_length_error.set_xlabel(r"Time (in $s$)")
-        self.ax_length_error.set_ylabel("Relative error (in %)")
-        self.ax_length_error.set_xlim(self.t0, self.tf)
+        ax_length_error.set_title("Relative error between the target length and the mean length of links")
+        ax_length_error.grid()
+        ax_length_error.set_xlabel(r"Time (in $s$)")
+        ax_length_error.set_ylabel("Relative error (in %)")
+        ax_length_error.set_xlim(self.t0, self.tf)
 
         mngr = plt.get_current_fig_manager()
         mngr.window.setGeometry(600, 0, 800, 450)
 
     def monitor_angle(self):
-        # Creating a plot
-        self.fig_length, self.ax_length = plt.subplots()
+        _, ax_angle = plt.subplots()
+        total_angle = []
 
-        self.total_length = []
-
-        for i in range(1, self.n-1):
-                self.total_length.append(np.linalg.norm(self.S[:, :, i+1]-self.S[:, :, i], axis=1))
+        for e in self.elements:
+            if e.previous is not None and e.next is not None:
+                u_previous = np.squeeze(np.asarray(e.previous.position)[:-1] - np.asarray(e.position)[:-1])
+                u_next = np.squeeze(np.asarray(e.next.position)[:-1] - np.asarray(e.position)[:-1])
+                total_angle.append(np.arccos(np.sum((u_previous*u_next) / (np.linalg.norm(u_previous) * np.linalg.norm(u_next)), axis=1)))
         
-        self.total_length = np.asarray(self.total_length)
-        self.ax_length.plot(self.t, self.total_length.T, color="grey")
+        total_angle = np.squeeze(np.asarray(total_angle))
 
-        m, std = np.mean(self.total_length, axis=0), np.std(self.total_length, axis=0)
-        self.ax_length.fill_between(self.t, m - 3*std, m + 3*std, facecolor='teal', alpha=0.4, label=r"$3.\sigma$ area")
-        self.ax_length.plot(self.t, m, color="crimson", linewidth=3, label="mean of lengths")
-        self.ax_length.plot(self.t, m - 3*std, color="teal", linewidth=2)
-        self.ax_length.plot(self.t, m + 3*std, color="teal", linewidth=2)
+        ax_angle.plot(self.t, total_angle.T, color="grey")
 
-        self.ax_length.plot(self.t, self.element_length*np.ones(self.t.shape), color="orange", label="target length", linewidth=2)
+        m, std = np.mean(total_angle, axis=0), np.std(total_angle, axis=0)
+        ax_angle.fill_between(self.t, m - 3*std, m + 3*std, facecolor='teal', alpha=0.4, label=r"$3.\sigma$ area")
+        ax_angle.plot(self.t, m, color="crimson", linewidth=3, label="mean of lengths")
+        ax_angle.plot(self.t, m - 3*std, color="teal", linewidth=2)
+        ax_angle.plot(self.t, m + 3*std, color="teal", linewidth=2)
 
-        self.ax_length.set_title("Length of the links")
-        self.ax_length.grid()
-        self.ax_length.set_xlabel(r"Time (in $s$)")
-        self.ax_length.set_ylabel(r"Length (in $m$)")
-        self.ax_length.set_xlim(self.t0, self.tf)
-        self.ax_length.legend()
+        ax_angle.plot(self.t, np.pi/2*np.ones(self.t.shape), color="orange", label="reference angle", linewidth=2)
+
+        ax_angle.set_title("Angle between links")
+        ax_angle.grid()
+        ax_angle.set_xlabel(r"Time (in $s$)")
+        ax_angle.set_ylabel(r"Angle (in $rad$)")
+        ax_angle.set_xlim(self.t0, self.tf)
+        ax_angle.legend()
 
         mngr = plt.get_current_fig_manager()
         mngr.window.setGeometry(0, 0, 600, 450)
 
     def monitor_kinetic_energy(self):
-        # Creating a plot
-        self.fig_ek, self.ax_ek = plt.subplots()
+        _, ax_ek = plt.subplots()
+        total_ek = []
 
-        self.total_ek = []
-
-        # Showing energy of each nodes
         for e in self.elements:
             if e.previous is not None and e.next is not None:
-                self.total_ek.append(e.Ek[1:])
+                total_ek.append(e.Ek[:-1])
 
-        self.total_ek = np.asarray(self.total_ek)
-        self.ax_ek.plot(self.t, self.total_ek.T, color="grey")
+        total_ek = np.asarray(total_ek)
+        ax_ek.plot(self.t, total_ek.T, color="grey")
 
-        m, std = np.mean(self.total_ek, axis=0), np.std(self.total_ek, axis=0)
-        self.ax_ek.fill_between(self.t, m - 3*std, m + 3*std, facecolor='teal', alpha=0.4, label=r"$3.\sigma$ area")
-        self.ax_ek.plot(self.t, m, color="crimson", linewidth=3, label="mean of potential energy")
-        self.ax_ek.plot(self.t, m - 3*std, color="teal", linewidth=2)
-        self.ax_ek.plot(self.t, m + 3*std, color="teal", linewidth=2)
+        m, std = np.mean(total_ek, axis=0), np.std(total_ek, axis=0)
+        ax_ek.fill_between(self.t, m - 3*std, m + 3*std, facecolor='teal', alpha=0.4, label=r"$3.\sigma$ area")
+        ax_ek.plot(self.t, m, color="crimson", linewidth=3, label="mean of potential energy")
+        ax_ek.plot(self.t, m - 3*std, color="teal", linewidth=2)
+        ax_ek.plot(self.t, m + 3*std, color="teal", linewidth=2)
 
-        self.ax_ek.set_title("Kinetic Energy")
-        self.ax_ek.grid()
-        self.ax_ek.set_xlabel(r"Time (in $s$)")
-        self.ax_ek.set_ylabel(r"Energy")
-        self.ax_ek.set_xlim(self.t0, self.tf)
-        self.ax_ek.set_ylim(-0.2, 0.2)
-        self.ax_ek.legend()
+        ax_ek.set_title("Kinetic Energy")
+        ax_ek.grid()
+        ax_ek.set_xlabel(r"Time (in $s$)")
+        ax_ek.set_ylabel(r"Energy")
+        ax_ek.set_xlim(self.t0, self.tf)
+        ax_ek.set_ylim(-0.2, 0.2)
+        ax_ek.legend()
 
     def monitor_potential_energy(self):
-        # Creating a plot
-        self.fig_ep, self.ax_ep = plt.subplots()
+        _, ax_ep = plt.subplots()
+        total_ep = []
 
-        self.total_ep = []
-
-        # Showing energy of each nodes
         for e in self.elements:
             if e.previous is not None and e.next is not None:
-                self.total_ep.append(e.Ep[1:])
+                total_ep.append(e.Ep[:-1])
 
-        self.total_ep = np.asarray(self.total_ep)
-        self.ax_ep.plot(self.t, self.total_ep.T, color="grey")
+        total_ep = np.asarray(total_ep)
+        ax_ep.plot(self.t, total_ep.T, color="grey")
 
-        m, std = np.mean(self.total_ep, axis=0), np.std(self.total_ep, axis=0)
-        self.ax_ep.fill_between(self.t, m - 3*std, m + 3*std, facecolor='teal', alpha=0.4, label=r"$3.\sigma$ area")
-        self.ax_ep.plot(self.t, m, color="crimson", linewidth=3, label="mean of potential energy")
-        self.ax_ep.plot(self.t, m - 3*std, color="teal", linewidth=2)
-        self.ax_ep.plot(self.t, m + 3*std, color="teal", linewidth=2)
+        m, std = np.mean(total_ep, axis=0), np.std(total_ep, axis=0)
+        ax_ep.fill_between(self.t, m - 3*std, m + 3*std, facecolor='teal', alpha=0.4, label=r"$3.\sigma$ area")
+        ax_ep.plot(self.t, m, color="crimson", linewidth=3, label="mean of potential energy")
+        ax_ep.plot(self.t, m - 3*std, color="teal", linewidth=2)
+        ax_ep.plot(self.t, m + 3*std, color="teal", linewidth=2)
 
-        self.ax_ep.set_title("Potential Energy")
-        self.ax_ep.grid()
-        self.ax_ep.set_xlabel(r"Time (in $s$)")
-        self.ax_ep.set_ylabel(r"Energy")
-        self.ax_ep.set_xlim(self.t0, self.tf)
-        self.ax_ep.legend()
+        ax_ep.set_title("Potential Energy")
+        ax_ep.grid()
+        ax_ep.set_xlabel(r"Time (in $s$)")
+        ax_ep.set_ylabel(r"Energy")
+        ax_ep.set_xlim(self.t0, self.tf)
+        ax_ep.legend()
 
     def monitor_energy(self):
         # Creating a plot
@@ -280,10 +271,11 @@ if __name__ == "__main__":
     # T.monitor_potential_energy()
     # T.monitor_kinetic_energy()
     # T.monitor_energy()
-    T.monitor_length()
-    T.monitor_length_error()
+    # T.monitor_length()
+    # T.monitor_length_error()
+    T.monitor_angle()
     plt.show()
     
-    T.simulate()
+    # T.simulate()
     # plt.show()
-    T.write_animation()
+    # T.write_animation()

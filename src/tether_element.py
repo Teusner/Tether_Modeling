@@ -63,15 +63,19 @@ class TetherElement:
         return self.acceleration[-1]
 
     def step(self, h):
+        # Compute acceleration
+        forces = np.hstack((self.Fg(), self.Fb(), self.Ft_prev(h),  self.Ft_next(h), self.Ff(), self.Fs()))
+        self.acceleration.append(np.clip(1 / self.mass * ((forces[:, self.forces_mask]) @ np.ones((6, 1))), -self.acceleration_limit, self.acceleration_limit))
+        
         if self.previous is not None and self.next is not None:
-            forces = np.hstack((self.Fg(), self.Fb(), self.Ft_prev(h),  self.Ft_next(h), self.Ff(), self.Fs()))
-            self.acceleration.append(np.clip(1 / self.mass * ((forces[:, self.forces_mask]) @ np.ones((6, 1))), -self.acceleration_limit, self.acceleration_limit))
             self.velocity.append(self.get_velocity() + h * self.get_acceleration())
             self.position.append(self.get_position() + h * self.get_velocity())
-
-            # Energy processing
-            self.Ek.append(self.mass/2*(self.get_velocity().T@self.get_velocity())[0,0])
-            self.Ep.append(self.Ep[-1] + self.dW(h))
+        else:
+            self.velocity.append(self.get_velocity())
+            self.position.append(self.get_position())
+            
+        self.Ek.append(self.mass/2*(self.get_velocity().T@self.get_velocity())[0,0])
+        self.Ep.append(self.Ep[-1] + self.dW(h))
 
     def Fg(self):
         return np.array([[0], [0], [-self.mass * self.g]])
