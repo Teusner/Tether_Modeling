@@ -269,7 +269,7 @@ class Tether:
 
 
 if __name__ == "__main__":
-    T = Tether(25, 25, "./config/TetherElement.yaml")
+    T = Tether(25, 10, "./config/TetherElement.yaml")
     T.process(0, 45, 1/20)
 
     # T.monitor_potential_energy()
