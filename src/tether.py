@@ -234,20 +234,22 @@ class Tether:
         self.ax = p3.Axes3D(self.fig)
 
         # Setting up title
-        self.ax.set_title('Tether')
+        self.fig.suptitle('Tether', fontsize=16)
 
         # Setting up axis labels
         self.ax.set_xlabel('X')
         self.ax.set_ylabel('Y')
         self.ax.set_zlabel('Z')
 
-        # Setting up axis limits
+        # Setting up axis limits and view
         self.ax.set_xlim3d(-1, 4)
         self.ax.set_ylim3d(-6, 6)
         self.ax.set_zlim3d(-20, 0)
+        self.ax.view_init(elev=20, azim=-50)
 
         # Creating n line object for each TetherElement
         self.graph, = self.ax.plot([], [], [], color="teal")
+        #self.scatters = self.ax.plot([], [], [], linestyle="", marker="o")
 
         # Creating 3D animation
         self.ani = animation.FuncAnimation(self.fig, self.animate, frames=int((self.tf-self.t0)/self.h), interval=int(1/self.h), blit=True, repeat=False)
@@ -260,6 +262,8 @@ class Tether:
             Z.append(e.position[i][2][0])
         self.graph.set_data(np.asarray(X), np.asarray(Y))
         self.graph.set_3d_properties(np.asarray(Z))
+        # self.scatters.set_data(np.asarray(X), np.asarray(Y))
+        # self.scatters.set_3d_properties(np.asarray(Z))
 
         # for k in range(self.n):
         #     if k == 0:
@@ -269,7 +273,7 @@ class Tether:
         #     else:
         #         col = "crimson"
             # self.ax.scatter3D(self.S[i, 0, k], self.S[i, 1, k], self.S[i, 2, k], color=col)
-        return self.graph,
+        return self.graph, #self.scatters,
 
     def write_animation(self):
         Writer = animation.writers['ffmpeg']
