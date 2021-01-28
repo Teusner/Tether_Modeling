@@ -249,10 +249,9 @@ class Tether:
 
         # Creating n line object for each TetherElement
         self.graph, = self.ax.plot([], [], [], color="teal", marker="o")
-        #self.scatters = self.ax.plot([], [], [], linestyle="", marker="o")
 
         # Creating 3D animation
-        self.ani = animation.FuncAnimation(self.fig, self.animate, frames=int((self.tf-self.t0)/self.h), interval=int(1/self.h), blit=True, repeat=False)
+        self.ani = animation.FuncAnimation(self.fig, self.animate, frames=int((self.tf-self.t0)/self.h), interval=self.h*1000, blit=True, repeat=False)
 
     def animate(self, i):
         X, Y, Z = [], [], []
@@ -262,18 +261,7 @@ class Tether:
             Z.append(e.position[i][2][0])
         self.graph.set_data(np.asarray(X), np.asarray(Y))
         self.graph.set_3d_properties(np.asarray(Z))
-        # self.scatters.set_data(np.asarray(X), np.asarray(Y))
-        # self.scatters.set_3d_properties(np.asarray(Z))
-
-        # for k in range(self.n):
-        #     if k == 0:
-        #         col = "purple"
-        #     elif k == self.n-1:
-        #         col = "gold"
-        #     else:
-        #         col = "crimson"
-            # self.ax.scatter3D(self.S[i, 0, k], self.S[i, 1, k], self.S[i, 2, k], color=col)
-        return self.graph, #self.scatters,
+        return self.graph,
 
     def write_animation(self):
         Writer = animation.writers['ffmpeg']
