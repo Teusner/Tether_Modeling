@@ -44,7 +44,7 @@ class TetherElement:
 
     def __str__(self):
         res = "TetherElement : {} \n".format(self.uuid)
-        res += "\t Positon : {}\n".format(self.position[-1].flatten())
+        res += "\t Positon : {}\n".format(self.get_position().flatten())
 
         previous_uuid = ("None" if self.previous is None else str(self.previous.uuid))
         res += "\t Prev \t : {} \n".format(previous_uuid)
@@ -53,15 +53,24 @@ class TetherElement:
         res += "\t Next \t : {} \n".format(next_uuid)
         return res
 
+    def get_position(self):
+        return self.position[-1]
+
+    def get_velocity(self):
+        return self.velocity[-1]
+
+    def get_acceleration(self):
+        return self.acceleration[-1]
+
     def step(self, h):
         if self.previous is not None and self.next is not None:
             forces = np.hstack((self.Fg(), self.Fb(), self.Ft_prev(h),  self.Ft_next(h), self.Ff(), self.Fs()))
             self.acceleration.append(np.clip(1 / self.mass * ((forces[:, self.forces_mask]) @ np.ones((6, 1))), -self.acceleration_limit, self.acceleration_limit))
-            self.velocity.append(self.velocity[-1] + h * self.acceleration[-1])
-            self.position.append(self.position[-1] + h * self.velocity[-1])
+            self.velocity.append(self.get_velocity() + h * self.get_acceleration())
+            self.position.append(self.get_position() + h * self.get_velocity())
 
             # Energy processing
-            self.Ek.append(self.mass/2*(self.velocity[-1].T@self.velocity[-1])[0,0])
+            self.Ek.append(self.mass/2*(self.get_velocity().T@self.get_velocity())[0,0])
             self.Ep.append(self.Ep[-1] + self.dW(h))
 
     def Fg(self):
@@ -72,8 +81,8 @@ class TetherElement:
 
     def Ft_prev(self, h):
         if self.previous is not None:
-            lm = np.linalg.norm(self.position[-1] - self.previous.position[-1])
-            u = (self.previous.position[-1] - self.position[-1]) / lm
+            lm = np.linalg.norm(self.get_position() - self.previous.get_position())
+            u = (self.previous.get_position() - self.get_position()) / lm
             force = - ( self.kp * (self.length - lm) / self.length + self.kd * (lm - self.previous_length) / h + self.ki * self.previous_int) * u
             self.previous_length = lm
             self.previous_int += h * (self.length - lm)
@@ -83,8 +92,8 @@ class TetherElement:
 
     def Ft_next(self, h):
         if self.next is not None:
-            lm = np.linalg.norm(self.next.position[-1] - self.position[-1])
-            u = (self.next.position[-1] - self.position[-1]) / lm
+            lm = np.linalg.norm(self.next.get_position() - self.get_position())
+            u = (self.next.get_position() - self.get_position()) / lm
             force = - ( self.kp * (self.length - lm) / self.length + self.kd * (lm - self.next_length) / h + self.ki * self.next_int) * u
             self.next_length = lm
             self.next_int += h * (self.length - lm)
@@ -93,12 +102,12 @@ class TetherElement:
             return np.zeros((3, 1))
 
     def Ff(self):
-        return - self.velocity[-1]*np.abs(self.velocity[-1])
+        return - self.get_velocity()*np.abs(self.get_velocity())
 
     def Fs(self):
         if self.next is not None and self.previous is not None:
-            u_previous = self.previous.position[-1] - self.position[-1]
-            u_next = self.next.position[-1] - self.position[-1]
+            u_previous = self.previous.get_position() - self.get_position()
+            u_next = self.next.get_position() - self.get_position()
 
             v = (u_previous + u_next) / 2
             return self.Tp * v
@@ -115,5 +124,3 @@ if __name__ == "__main__":
     t2 = TetherElement(1, 1, 1, np.array([[0], [0], [1]]))
     t1.next = t2
     t2.previous = t1
-    print(t1)
-    print(t2)

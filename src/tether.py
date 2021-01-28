@@ -7,6 +7,12 @@ import matplotlib.animation as animation
 
 from tether_element import TetherElement
 
+### TODO
+# Adding process time benchmark
+# Adding extermities forces to see forces which are going to be applied to the MMO
+# Better behavioral force and torque with correct PID
+# Monitoring angles with normal vectors : angle = arccos(a.b)
+
 
 class Tether:
     def __init__(self, L, n):
@@ -46,28 +52,16 @@ class Tether:
         res = ""
         for e in self.elements:
             res += str(e)
-        return res
-
-    def step(self, h):
-        for e in self.elements:
-            e.step(h)
+        return res        
 
     def process(self, t0, tf, h):
         # Saving parameters
         self.t0, self.tf, self.h = t0, tf, h
-        self.S = []
-
         self.t = np.arange(self.t0, self.tf, self.h)
 
-        for i in self.t:
-            self.step(self.h)
-            x_points, y_points, z_points = [], [], []
+        for _ in self.t:
             for e in self.elements:
-                x_points.append(e.position[0, 0])
-                y_points.append(e.position[1, 0])
-                z_points.append(e.position[2, 0])
-            self.S.append([x_points, y_points, z_points])
-        self.S = np.asarray(self.S)
+                e.step(h)
 
     def simulate(self):
         # Attaching 3D axis to the figure 
