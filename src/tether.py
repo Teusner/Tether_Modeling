@@ -8,14 +8,16 @@ import time
 from tether_element import TetherElement
 
 ### TODO
+# Fixing n / L / number of TetherElement per meters
 # Adding extermities forces to see forces which are going to be applied to the MMO
 # Better behavioral force and torque with correct PID
 
 class Tether:
-    def __init__(self, L, n):
+    def __init__(self, L, n, config_filename):
         # Tether parameters
         self.n = n
         self.L = L
+        self.config_filename = config_filename
 
         # List of TetherElements
         self.elements = []
@@ -34,8 +36,8 @@ class Tether:
             xe = i * (self.position_last[0] - self.position_first[0]) / n
             ye = i * (self.position_last[1] - self.position_first[1]) / n
             ze = i * (self.position_last[2] - self.position_first[2]) / n
-            position = np.array([xe, ye, ze]) #+ np.random.randn(3, 1)
-            self.elements.append(TetherElement(self.element_mass, self.element_length, self.element_volume, position))
+            position = np.array([xe, ye, ze])
+            self.elements.append(TetherElement(self.element_mass, self.element_length, self.element_volume, position, self.config_filename))
         
         # Chaining elements
         for i in range(1, n-1):
@@ -267,7 +269,7 @@ class Tether:
 
 
 if __name__ == "__main__":
-    T = Tether(25, 15)
+    T = Tether(25, 25, "./config/TetherElement.yaml")
     T.process(0, 45, 1/20)
 
     # T.monitor_potential_energy()
@@ -280,4 +282,3 @@ if __name__ == "__main__":
     
     T.simulate()
     plt.show()
-    T.write_animation()

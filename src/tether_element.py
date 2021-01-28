@@ -7,7 +7,7 @@ class TetherElement:
     g = 9.81
     rho = 1000
 
-    def __init__(self, mass, length, volume, position):
+    def __init__(self, mass, length, volume, position, config_filename=None):
         # UUID and pointer to the neighbors TetherElements
         self.uuid = uuid.uuid4()
         self.previous = None
@@ -42,6 +42,10 @@ class TetherElement:
 
         # Proportionnal resistant torque
         self.Tp = 50.
+
+        # Loading_parameters
+        if config_filename is not None:
+            self.load_parameters(config_filename)
 
     def __str__(self):
         res = "TetherElement : {} \n".format(self.uuid)
