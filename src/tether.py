@@ -228,7 +228,7 @@ class Tether:
         ax_energy.set_xlim(self.t0, self.tf)
         ax_energy.legend()
     
-    def simulate(self):
+    def simulate(self, save=False, filename="tether.mp4"):
         # Attaching 3D axis to the figure 
         self.fig = plt.figure() 
         self.ax = p3.Axes3D(self.fig)
@@ -253,6 +253,11 @@ class Tether:
         # Creating 3D animation
         self.ani = animation.FuncAnimation(self.fig, self.animate, frames=int((self.tf-self.t0)/self.h), interval=self.h*1000, blit=True, repeat=False)
 
+        if save:
+            Writer = animation.writers['ffmpeg']
+            writer = Writer(fps=int(1/self.h), metadata=dict(artist='Me'), bitrate=1800, codec="libx264")
+            self.ani.save(filename, writer=writer)
+
     def animate(self, i):
         X, Y, Z = [], [], []
         for e in self.elements:
@@ -261,12 +266,7 @@ class Tether:
             Z.append(e.position[i][2][0])
         self.graph.set_data(np.asarray(X), np.asarray(Y))
         self.graph.set_3d_properties(np.asarray(Z))
-        return self.graph,
-
-    def write_animation(self):
-        Writer = animation.writers['ffmpeg']
-        writer = Writer(fps=int(1/self.h), metadata=dict(artist='Me'), bitrate=1800, codec="libx264")
-        self.ani.save('tether_1.mp4', writer=writer)
+        return self.graph,        
 
 
 if __name__ == "__main__":
