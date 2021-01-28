@@ -177,9 +177,9 @@ class Tether:
         ax_ek.plot(self.t, total_ek.T, color="grey")
 
         m, std = np.mean(total_ek, axis=0), np.std(total_ek, axis=0)
-        ax_ek.fill_between(self.t, m - 3*std, m + 3*std, facecolor='teal', alpha=0.4, label=r"$3.\sigma$ area")
+        ax_ek.fill_between(self.t, np.maximum(np.zeros(m.shape), m - 3*std), m + 3*std, facecolor='teal', alpha=0.4, label=r"$3.\sigma$ area")
         ax_ek.plot(self.t, m, color="crimson", linewidth=3, label="mean of potential energy")
-        ax_ek.plot(self.t, m - 3*std, color="teal", linewidth=2)
+        ax_ek.plot(self.t, np.maximum(np.zeros(m.shape), m - 3*std), color="teal", linewidth=2)
         ax_ek.plot(self.t, m + 3*std, color="teal", linewidth=2)
 
         ax_ek.set_title("Kinetic Energy")
@@ -187,7 +187,6 @@ class Tether:
         ax_ek.set_xlabel(r"Time (in $s$)")
         ax_ek.set_ylabel(r"Energy")
         ax_ek.set_xlim(self.t0, self.tf)
-        ax_ek.set_ylim(-0.2, 0.2)
         ax_ek.legend()
 
     def monitor_potential_energy(self):
@@ -215,37 +214,34 @@ class Tether:
         ax_ep.legend()
 
     def monitor_energy(self):
-        # Creating a plot
-        self.fig_energy, self.ax_energy = plt.subplots()
+        _, ax_energy = plt.subplots()
+        total_ek = []
+        total_ep = []
 
-        self.total_ek = []
-        self.total_ep = []
-
-        # Showing energy of each nodes
         for e in self.elements:
             if e.previous is not None and e.next is not None:
-                self.total_ek.append(e.Ek[1:])
-                self.total_ep.append(e.Ep[1:])
+                total_ek.append(e.Ek[:-1])
+                total_ep.append(e.Ep[:-1])
 
-        self.total_ek = np.asarray(self.total_ek)
-        self.total_ep = np.asarray(self.total_ep)
+        total_ep = np.asarray(total_ep)
+        total_ek = np.asarray(total_ek)
 
-        self.energy = self.total_ek + self.total_ep
+        energy = total_ek + total_ep
         
-        self.ax_energy.plot(self.t, self.energy.T, color="grey")
+        ax_energy.plot(self.t, energy.T, color="grey")
 
-        m, std = np.mean(self.energy, axis=0), np.std(self.energy, axis=0)
-        self.ax_energy.fill_between(self.t, m - 3*std, m + 3*std, facecolor='teal', alpha=0.4, label=r"$3.\sigma$ area")
-        self.ax_energy.plot(self.t, m, color="crimson", linewidth=3, label="mean of potential energy")
-        self.ax_energy.plot(self.t, m - 3*std, color="teal", linewidth=2)
-        self.ax_energy.plot(self.t, m + 3*std, color="teal", linewidth=2)
+        m, std = np.mean(energy, axis=0), np.std(energy, axis=0)
+        ax_energy.fill_between(self.t, m - 3*std, m + 3*std, facecolor='teal', alpha=0.4, label=r"$3.\sigma$ area")
+        ax_energy.plot(self.t, m, color="crimson", linewidth=3, label="mean of potential energy")
+        ax_energy.plot(self.t, m - 3*std, color="teal", linewidth=2)
+        ax_energy.plot(self.t, m + 3*std, color="teal", linewidth=2)
 
-        self.ax_energy.set_title("Energy")
-        self.ax_energy.grid()
-        self.ax_energy.set_xlabel(r"Time (in $s$)")
-        self.ax_energy.set_ylabel(r"Energy")
-        self.ax_energy.set_xlim(self.t0, self.tf)
-        self.ax_energy.legend()
+        ax_energy.set_title("Energy")
+        ax_energy.grid()
+        ax_energy.set_xlabel(r"Time (in $s$)")
+        ax_energy.set_ylabel(r"Energy")
+        ax_energy.set_xlim(self.t0, self.tf)
+        ax_energy.legend()
     
     def animate(self, i): 
         self.ax.clear() 
@@ -268,11 +264,11 @@ class Tether:
 if __name__ == "__main__":
     T = Tether(25, 15)
     T.process(0, 45, 1/20)
-    # T.monitor_potential_energy()
-    # T.monitor_kinetic_energy()
-    # T.monitor_energy()
-    # T.monitor_length()
-    # T.monitor_length_error()
+    T.monitor_potential_energy()
+    T.monitor_kinetic_energy()
+    T.monitor_energy()
+    T.monitor_length()
+    T.monitor_length_error()
     T.monitor_angle()
     plt.show()
     
