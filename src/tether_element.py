@@ -56,8 +56,25 @@ class TetherElement:
     
     def load_parameters(self, filename):
         with open(filename) as f:
-            data = yaml.load(f)
-            print(data["Length"])
+            parameters = yaml.load(f)
+
+            # TetherElement parameters
+            self.mass = parameters["TetherElement"]["mass"]
+            self.length = parameters["TetherElement"]["length"]
+            self.volume = parameters["TetherElement"]["volume"]
+
+            # Force
+            self.kp = parameters["Length"]["Kp"]
+            self.kd = parameters["Length"]["Kd"]
+            self.ki = parameters["Length"]["Ki"]
+
+            # Force
+            self.Tp = parameters["Torque"]["Kp"]
+            self.Td = parameters["Torque"]["Kd"]
+            self.Ti = parameters["Torque"]["Ki"]
+
+            # Drag coefficient
+            self.f = parameters["Drag"]["f"]
 
     def get_position(self):
         return self.position[-1]
@@ -138,3 +155,4 @@ if __name__ == "__main__":
     print(t2)
 
     t1.load_parameters("./config/TetherElement.yaml")
+    print(t2.kp, t2.kd, t2.ki)
