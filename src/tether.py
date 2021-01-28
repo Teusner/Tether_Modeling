@@ -8,11 +8,8 @@ import time
 from tether_element import TetherElement
 
 ### TODO
-# Adding process time benchmark
 # Adding extermities forces to see forces which are going to be applied to the MMO
 # Better behavioral force and torque with correct PID
-# Monitoring angles with normal vectors : angle = arccos(a.b)
-
 
 class Tether:
     def __init__(self, L, n):
