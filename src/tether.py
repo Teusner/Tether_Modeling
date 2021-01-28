@@ -248,7 +248,7 @@ class Tether:
         self.ax.view_init(elev=20, azim=-50)
 
         # Creating n line object for each TetherElement
-        self.graph, = self.ax.plot([], [], [], color="teal")
+        self.graph, = self.ax.plot([], [], [], color="teal", marker="o")
         #self.scatters = self.ax.plot([], [], [], linestyle="", marker="o")
 
         # Creating 3D animation
