@@ -75,6 +75,7 @@ class TetherElement:
 
             # Drag coefficient
             self.f = parameters["Drag"]["f"]
+<<<<<<< HEAD
 
     def get_position(self):
         return self.position[-1]
@@ -84,6 +85,8 @@ class TetherElement:
 
     def get_acceleration(self):
         return self.acceleration[-1]
+=======
+>>>>>>> 87833f9409f56dd349bb8b8904af4395e30e861b
 
     def step(self, h):
         # Compute acceleration
