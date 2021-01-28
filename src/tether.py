@@ -1,9 +1,9 @@
-import numpy as np
 import matplotlib.pyplot as plt
-#from mpl_toolkits import mplot3d
-from mpl_toolkits.mplot3d import Axes3D
 import mpl_toolkits.mplot3d.axes3d as p3
 import matplotlib.animation as animation
+
+import numpy as np
+import time
 
 from tether_element import TetherElement
 
@@ -59,26 +59,11 @@ class Tether:
         self.t0, self.tf, self.h = t0, tf, h
         self.t = np.arange(self.t0, self.tf, self.h)
 
+        t0 = time.time()
         for _ in self.t:
             for e in self.elements:
                 e.step(h)
-
-    def simulate(self):
-        # Attaching 3D axis to the figure 
-        self.fig = plt.figure() 
-        self.ax = p3.Axes3D(self.fig) 
-
-        # Setting the axes properties 
-        self.ax.set_xlim3d(0, 12)
-        self.ax.set_ylim3d(-6, 6)
-        self.ax.set_zlim3d(0, 12)
-
-        self.ani = animation.FuncAnimation(self.fig, self.animate, frames=int((self.tf-self.t0)/self.h), interval=int(1/self.h), blit=False, repeat=False)
-    
-    def write_animation(self):
-        Writer = animation.writers['ffmpeg']
-        writer = Writer(fps=int(1/self.h), metadata=dict(artist='Me'), bitrate=1800, codec="libx264")
-        self.ani.save('tether_1.mp4', writer=writer)
+        print("\033[32mTotal process time : {} s\033[0m".format(time.time()-t0))
 
     def monitor_length(self):
         _, ax_length = plt.subplots()
@@ -243,35 +228,67 @@ class Tether:
         ax_energy.set_xlim(self.t0, self.tf)
         ax_energy.legend()
     
-    def animate(self, i): 
-        self.ax.clear() 
-        self.ax.set_xlim3d(0, 20)
-        self.ax.set_ylim3d(-10, 10)
-        self.ax.set_zlim3d(-15, 5)
-                    
-        self.ax.plot3D(self.S[i, 0], self.S[i, 1], self.S[i, 2], color="teal")
+    def simulate(self):
+        # Attaching 3D axis to the figure 
+        self.fig = plt.figure() 
+        self.ax = p3.Axes3D(self.fig)
 
-        for k in range(self.n):
-            if k == 0:
-                col = "purple"
-            elif k == self.n-1:
-                col = "gold"
-            else:
-                col = "crimson"
-            self.ax.scatter3D(self.S[i, 0, k], self.S[i, 1, k], self.S[i, 2, k], color=col)
+        # Setting up title
+        self.ax.set_title('Tether')
+
+        # Setting up axis labels
+        self.ax.set_xlabel('X')
+        self.ax.set_ylabel('Y')
+        self.ax.set_zlabel('Z')
+
+        # Setting up axis limits
+        self.ax.set_xlim3d(-1, 4)
+        self.ax.set_ylim3d(-6, 6)
+        self.ax.set_zlim3d(-20, 0)
+
+        # Creating n line object for each TetherElement
+        self.graph, = self.ax.plot([], [], [], color="teal")
+
+        # Creating 3D animation
+        self.ani = animation.FuncAnimation(self.fig, self.animate, frames=int((self.tf-self.t0)/self.h), interval=int(1/self.h), blit=True, repeat=False)
+
+    def animate(self, i):
+        X, Y, Z = [], [], []
+        for e in self.elements:
+            X.append(e.position[i][0][0])
+            Y.append(e.position[i][1][0])
+            Z.append(e.position[i][2][0])
+        self.graph.set_data(np.asarray(X), np.asarray(Y))
+        self.graph.set_3d_properties(np.asarray(Z))
+
+        # for k in range(self.n):
+        #     if k == 0:
+        #         col = "purple"
+        #     elif k == self.n-1:
+        #         col = "gold"
+        #     else:
+        #         col = "crimson"
+            # self.ax.scatter3D(self.S[i, 0, k], self.S[i, 1, k], self.S[i, 2, k], color=col)
+        return self.graph,
+
+    def write_animation(self):
+        Writer = animation.writers['ffmpeg']
+        writer = Writer(fps=int(1/self.h), metadata=dict(artist='Me'), bitrate=1800, codec="libx264")
+        self.ani.save('tether_1.mp4', writer=writer)
 
 
 if __name__ == "__main__":
     T = Tether(25, 15)
     T.process(0, 45, 1/20)
-    T.monitor_potential_energy()
-    T.monitor_kinetic_energy()
-    T.monitor_energy()
-    T.monitor_length()
-    T.monitor_length_error()
-    T.monitor_angle()
-    plt.show()
-    
-    # T.simulate()
+
+    # T.monitor_potential_energy()
+    # T.monitor_kinetic_energy()
+    # T.monitor_energy()
+    # T.monitor_length()
+    # T.monitor_length_error()
+    # T.monitor_angle()
     # plt.show()
-    # T.write_animation()
+    
+    T.simulate()
+    plt.show()
+    T.write_animation()
