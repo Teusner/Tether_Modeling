@@ -265,7 +265,7 @@ class Tether:
             Z.append(e.position[i][2][0])
         self.graph.set_data(np.asarray(X), np.asarray(Y))
         self.graph.set_3d_properties(np.asarray(Z))
-        return self.graph,        
+        return self.graph,
 
 
 if __name__ == "__main__":
