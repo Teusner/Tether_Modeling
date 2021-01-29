@@ -2,21 +2,21 @@
 
 # TetherElement parameters
 TetherElement:
-    mass: 8.93
-    length: 1.78
-    volume: 0.00014
+    mass: 10
+    length: 1
+    volume: 0.001
 
 # Length coefficients for links
 Length:
-    Kp: 200
-    Kd: 3.5
-    Ki: 3
+    Kp: 1.
+    Kd: 0
+    Ki: 0
 
 # Torque coefficients for rigidity
 Torque:
-    Kp: 50
-    Kd: 1.0
-    Ki: 1.0
+    Kp: 0.
+    Kd: 0
+    Ki: 0
 
 Drag:
     f: 1.0

@@ -147,7 +147,7 @@ class Tether:
         ax_angle.legend()
 
         mngr = plt.get_current_fig_manager()
-        mngr.window.setGeometry(0, 0, 600, 450)
+        mngr.window.setGeometry(0, 500, 600, 450)
 
     def monitor_kinetic_energy(self):
         _, ax_ek = plt.subplots()
@@ -270,15 +270,15 @@ class Tether:
 
 if __name__ == "__main__":
     T = Tether(25, 10, "./config/TetherElement.yaml")
-    T.process(0, 45, 1/20)
+    T.process(0, 30, 1/20)
 
     # T.monitor_potential_energy()
     # T.monitor_kinetic_energy()
     # T.monitor_energy()
-    # T.monitor_length()
-    # T.monitor_length_error()
-    # T.monitor_angle()
-    # plt.show()
+    T.monitor_length()
+    T.monitor_length_error()
+    T.monitor_angle()
+    plt.show()
     
     T.simulate()
     plt.show()
