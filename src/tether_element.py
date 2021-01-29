@@ -126,28 +126,52 @@ class TetherElement:
         return np.array([[0], [0], [self.rho * self.volume * self.g]])
 
     def Ft_prev(self, h):
-        if self.previous is None:
+        if self.previous is not None:
+            lm = np.linalg.norm(self.get_position() - self.previous.get_position())
+            u = (self.previous.get_position() - self.get_position()) / lm
+            force = - ( self.kp * (self.length - lm) / self.length + self.kd * (lm - self.previous_length) / h + self.ki * self.previous_int) * u
+            self.previous_length = lm
+            self.previous_int += h * (self.length - lm)
+            return force
+        else :
             return np.zeros((3, 1))
-        
-        e = np.linalg.norm(self.get_position() - self.previous.get_position()) - self.length
-        de = ( np.linalg.norm(self.get_position()-self.previous.get_position()+h*(self.get_velocity()-self.previous.get_velocity())) \
-            - np.linalg.norm(self.get_position()-self.previous.get_position()) ) / h
-        self.E_previous += h*e
-
-        u = (self.get_position() - self.previous.get_position()) / np.linalg.norm(self.get_position() - self.previous.get_position())
-        return (self.kp*e + self.kd*de + self.ki*self.E_previous ) * u
 
     def Ft_next(self, h):
-        if self.next is None:
+        if self.next is not None:
+            lm = np.linalg.norm(self.next.get_position() - self.get_position())
+            u = (self.next.get_position() - self.get_position()) / lm
+            force = - ( self.kp * (self.length - lm) / self.length + self.kd * (lm - self.next_length) / h + self.ki * self.next_int) * u
+            self.next_length = lm
+            self.next_int += h * (self.length - lm)
+            return force
+        else :
             return np.zeros((3, 1))
-        
-        e = np.linalg.norm(self.next.get_position() - self.get_position()) - self.length
-        de = ( np.linalg.norm(self.next.get_position()-self.get_position()+h*(self.next.get_velocity()-self.get_velocity())) \
-            - np.linalg.norm(self.next.get_position()-self.get_position()) ) / h
-        self.E_next += h*e
 
-        u = (self.next.get_position() - self.get_position()) / np.linalg.norm(self.next.get_position() - self.get_position())
-        return (self.kp*e + self.kd*de + self.ki*self.E_next ) * u
+    # def Ft_prev(self, h):
+    #     if self.previous is None:
+    #         return np.zeros((3, 1))
+    #     lm = np.linalg.norm(self.get_position() - self.previous.get_position())
+    #     u = (self.previous.get_position() - self.get_position()) / lm
+
+    #     e = (self.length - lm) / self.length
+    #     de = (lm - self.previous_length)/ h
+    #     self.previous_length = lm
+    #     self.E_previous += h*e
+
+    #     return -(self.kp*e + self.kd*de + self.ki*self.E_previous ) * u
+
+    # def Ft_next(self, h):
+    #     if self.next is None:
+    #         return np.zeros((3, 1))
+    #     lm = np.linalg.norm(self.next.get_position() - self.get_position())
+    #     u = (self.next.get_position() - self.get_position()) / lm
+
+    #     e = (self.length - lm) / self.length
+    #     de = (lm - self.next_length)/ h
+    #     self.next_length = lm
+    #     self.E_next += h*e
+
+    #     return -(self.kp*e + self.kd*de + self.ki*self.E_next ) * u
 
     def Ff(self):
         return - self.get_velocity()*np.abs(self.get_velocity())
@@ -159,15 +183,17 @@ class TetherElement:
         u_previous = (self.previous.get_position() - self.get_position())
         u_next = (self.next.get_position() - self.get_position())
 
-        value = np.clip((u_next.T @ u_previous) / (np.linalg.norm(self.previous.get_position() - self.get_position()) * np.linalg.norm((self.next.get_position() - self.get_position()))), -1, 1)
+        value = np.clip((u_next.T @ u_previous) / (np.linalg.norm(self.previous.get_position() - self.get_position()) * np.linalg.norm((self.next.get_position() - self.get_position()))), -1.0, 1.0)
         e = np.arccos(value) - np.pi/2
-        de = (np.arccos(((u_next + h*(self.next.get_velocity() - self.get_velocity())).T @ (u_previous+h*(self.previous.get_velocity() - self.get_velocity())))) - e + np.pi/2) / h
+        value = np.clip((u_next + h*(self.next.get_velocity() - self.get_velocity())).T @ (u_previous+h*(self.previous.get_velocity() - self.get_velocity())), -1.0, 1.0)
+        de = (np.arccos(value) - e + np.pi/2) / h
         self.E_torque += h*e
 
-        if not np.allclose((u_previous + u_next), np.zeros((3, 1))):
+        if np.allclose((u_previous + u_next), np.zeros((3, 1))):
             return np.zeros((3, 1))
-            # self.v = (u_previous + u_next) / np.linalg.norm(u_previous + u_next)
-        return (self.Tp*e + self.Td*de + self.Ti*self.E_torque) * self.v
+        else:
+            self.v = (u_previous + u_next) / np.linalg.norm(u_previous + u_next)
+            return (self.Tp*e + self.Td*de + self.Ti*self.E_torque) * self.v
 
     def dW(self, h):
         W = self.velocity[-1].T @ np.hstack((self.Fg(), self.Fb(), self.Ft_prev(h), self.Ft_next(h), self.Ff(), self.Fs(h)))
