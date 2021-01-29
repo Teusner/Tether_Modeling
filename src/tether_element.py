@@ -1,12 +1,13 @@
 import numpy as np
 import uuid
+import yaml
 
 class TetherElement:
     # Physical constants of the system
     g = 9.81
     rho = 1000
 
-    def __init__(self, mass, length, volume, position):
+    def __init__(self, mass, length, volume, position, config_filename=None):
         # UUID and pointer to the neighbors TetherElements
         self.uuid = uuid.uuid4()
         self.previous = None
@@ -42,6 +43,10 @@ class TetherElement:
         # Proportionnal resistant torque
         self.Tp = 50.
 
+        # Loading_parameters
+        if config_filename is not None:
+            self.load_parameters(config_filename)
+
     def __str__(self):
         res = "TetherElement : {} \n".format(self.uuid)
         res += "\t Positon : {}\n".format(self.get_position().flatten())
@@ -52,6 +57,28 @@ class TetherElement:
         next_uuid = ("None" if self.next is None else str(self.next.uuid))
         res += "\t Next \t : {} \n".format(next_uuid)
         return res
+    
+    def load_parameters(self, filename):
+        with open(filename) as f:
+            parameters = yaml.load(f)
+
+            # TetherElement parameters
+            self.mass = parameters["TetherElement"]["mass"]
+            self.length = parameters["TetherElement"]["length"]
+            self.volume = parameters["TetherElement"]["volume"]
+
+            # Force
+            self.kp = parameters["Length"]["Kp"]
+            self.kd = parameters["Length"]["Kd"]
+            self.ki = parameters["Length"]["Ki"]
+
+            # Force
+            self.Tp = parameters["Torque"]["Kp"]
+            self.Td = parameters["Torque"]["Kd"]
+            self.Ti = parameters["Torque"]["Ki"]
+
+            # Drag coefficient
+            self.f = parameters["Drag"]["f"]
 
     def get_position(self):
         return self.position[-1]
@@ -128,3 +155,8 @@ if __name__ == "__main__":
     t2 = TetherElement(1, 1, 1, np.array([[0], [0], [1]]))
     t1.next = t2
     t2.previous = t1
+    print(t1)
+    print(t2)
+
+    t1.load_parameters("./config/TetherElement.yaml")
+    print(t2.kp, t2.kd, t2.ki)
