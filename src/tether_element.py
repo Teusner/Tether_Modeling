@@ -2,6 +2,11 @@ import numpy as np
 import uuid
 import yaml
 
+### TODO
+# Add cleaned up behavioral model
+# Cleaning the force mask
+# Cleaning the acceleration processing part
+
 class TetherElement:
     # Physical constants of the system
     g = 9.81
@@ -39,6 +44,16 @@ class TetherElement:
         self.next_length = 0.
         self.previous_int = 0.
         self.next_int = 0.
+
+        # Integrator for force
+        self.E_previous = 0.
+        self.E_next = 0.
+
+        # Integrator for torque
+        self.E_torque = 0.
+
+        # Support vector for torque
+        self.v = np.array([[0], [0], [1]])
 
         # Proportionnal resistant torque
         self.Tp = 50.
@@ -91,7 +106,7 @@ class TetherElement:
 
     def step(self, h):
         # Compute acceleration
-        forces = np.hstack((self.Fg(), self.Fb(), self.Ft_prev(h),  self.Ft_next(h), self.Ff(), self.Fs()))
+        forces = np.hstack((self.Fg(), self.Fb(), self.Ft_prev(h),  self.Ft_next(h), self.Ff(), self.Fs(h)))
         self.acceleration.append(np.clip(1 / self.mass * ((forces[:, self.forces_mask]) @ np.ones((6, 1))), -self.acceleration_limit, self.acceleration_limit))
         
         if self.previous is not None and self.next is not None:
@@ -133,20 +148,29 @@ class TetherElement:
             return np.zeros((3, 1))
 
     def Ff(self):
-        return - self.get_velocity()*np.abs(self.get_velocity())
+        return - self.f * self.get_velocity()*np.abs(self.get_velocity())
 
-    def Fs(self):
-        if self.next is not None and self.previous is not None:
-            u_previous = self.previous.get_position() - self.get_position()
-            u_next = self.next.get_position() - self.get_position()
-
-            v = (u_previous + u_next) / 2
-            return self.Tp * v
-        else :
+    def Fs(self, h):
+        if self.next is None or self.previous is None:
             return np.zeros((3, 1))
+        
+        u_previous = (self.previous.get_position() - self.get_position())
+        u_next = (self.next.get_position() - self.get_position())
+
+        value = np.clip((u_next.T @ u_previous) / (np.linalg.norm(self.previous.get_position() - self.get_position()) * np.linalg.norm((self.next.get_position() - self.get_position()))), -1.0, 1.0)
+        e = (np.arccos(value) - np.pi/2) / (np.pi / 2)
+        value = np.clip((u_next + h*(self.next.get_velocity() - self.get_velocity())).T @ (u_previous+h*(self.previous.get_velocity() - self.get_velocity())), -1.0, 1.0)
+        de = (np.arccos(value) - e) / h
+        self.E_torque += h*e
+
+        if np.allclose((u_previous + u_next), np.zeros((3, 1))):
+            return np.zeros((3, 1))
+        else:
+            self.v = (u_previous + u_next) / np.linalg.norm(u_previous + u_next)
+            return (self.Tp*e + self.Td*de + self.Ti*self.E_torque) * self.v
 
     def dW(self, h):
-        W = self.velocity[-1].T @ np.hstack((self.Fg(), self.Fb(), self.Ft_prev(h), self.Ft_next(h), self.Ff(), self.Fs()))
+        W = self.velocity[-1].T @ np.hstack((self.Fg(), self.Fb(), self.Ft_prev(h), self.Ft_next(h), self.Ff(), self.Fs(h)))
         return np.sum(h * W)
 
 
