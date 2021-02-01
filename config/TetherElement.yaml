@@ -8,13 +8,13 @@ TetherElement:
 
 # Length coefficients for links
 Length:
-    Kp: 10.
+    Kp: 15.
     Kd: 2.
     Ki: 2.
 
 # Torque coefficients for rigidity
 Torque:
-    Kp: 1.
+    Kp: 10.
     Kd: 1.
     Ki: 0.
 

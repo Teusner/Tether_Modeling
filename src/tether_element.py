@@ -184,9 +184,9 @@ class TetherElement:
         u_next = (self.next.get_position() - self.get_position())
 
         value = np.clip((u_next.T @ u_previous) / (np.linalg.norm(self.previous.get_position() - self.get_position()) * np.linalg.norm((self.next.get_position() - self.get_position()))), -1.0, 1.0)
-        e = np.arccos(value) - np.pi/2
+        e = (np.arccos(value) - np.pi/2) / (np.pi / 2)
         value = np.clip((u_next + h*(self.next.get_velocity() - self.get_velocity())).T @ (u_previous+h*(self.previous.get_velocity() - self.get_velocity())), -1.0, 1.0)
-        de = (np.arccos(value) - e + np.pi/2) / h
+        de = (np.arccos(value) - e) / h
         self.E_torque += h*e
 
         if np.allclose((u_previous + u_next), np.zeros((3, 1))):
