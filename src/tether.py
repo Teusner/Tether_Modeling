@@ -2,6 +2,8 @@ import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d.axes3d as p3
 import matplotlib.animation as animation
 
+from scipy.optimize import fsolve
+
 import numpy as np
 import time
 
@@ -30,6 +32,14 @@ class Tether:
         # Extremities
         self.position_first = np.array([[12.], [0.], [5.]])
         self.position_last = np.array([[15.], [0.], [0.]])
+
+        def f(p):
+            eq1 = p[0]*np.sinh((self.posiiton_last[0, 0]+p[1])/p[0]) - a*np.sinh((self.position_first[0, 0]+p[1])/a) - self.L
+            eq2 = p[0]*np.cosh((self.position_first[0, 0]+p[1])/p[0]) + p[2] - self.position_first[1, 0]
+            eq3 = p[0]*np.cosh((self.position_last[0, 0]+p[1])/p[0]) + p[2] - self.position_last[1, 0]
+            return [eq1, eq2, eq3]
+
+        self.init_p = fsolve(f, (1., (self.position_first[0, 0]+self.position_last[0, 0])/2, (self.position_first[1, 0]+self.position_last[1, 0])/2), factor=0.1)
 
         # Initialise random positions for each TetherElements
         for i in range(n):
