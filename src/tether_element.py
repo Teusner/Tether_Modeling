@@ -147,34 +147,8 @@ class TetherElement:
         else :
             return np.zeros((3, 1))
 
-    # def Ft_prev(self, h):
-    #     if self.previous is None:
-    #         return np.zeros((3, 1))
-    #     lm = np.linalg.norm(self.get_position() - self.previous.get_position())
-    #     u = (self.previous.get_position() - self.get_position()) / lm
-
-    #     e = (self.length - lm) / self.length
-    #     de = (lm - self.previous_length)/ h
-    #     self.previous_length = lm
-    #     self.E_previous += h*e
-
-    #     return -(self.kp*e + self.kd*de + self.ki*self.E_previous ) * u
-
-    # def Ft_next(self, h):
-    #     if self.next is None:
-    #         return np.zeros((3, 1))
-    #     lm = np.linalg.norm(self.next.get_position() - self.get_position())
-    #     u = (self.next.get_position() - self.get_position()) / lm
-
-    #     e = (self.length - lm) / self.length
-    #     de = (lm - self.next_length)/ h
-    #     self.next_length = lm
-    #     self.E_next += h*e
-
-    #     return -(self.kp*e + self.kd*de + self.ki*self.E_next ) * u
-
     def Ff(self):
-        return - self.get_velocity()*np.abs(self.get_velocity())
+        return - self.f * self.get_velocity()*np.abs(self.get_velocity())
 
     def Fs(self, h):
         if self.next is None or self.previous is None:
