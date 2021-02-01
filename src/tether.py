@@ -30,23 +30,24 @@ class Tether:
         self.element_volume = np.pi*0.005**2*self.element_length
 
         # Extremities
-        self.position_first = np.array([[12.], [0.], [5.]])
-        self.position_last = np.array([[15.], [0.], [0.]])
+        self.position_first = np.array([[12.], [-2.], [5.]])
+        self.position_last = np.array([[18.], [2.], [0.]])
 
         def f(p):
-            eq1 = p[0]*np.sinh((self.posiiton_last[0, 0]+p[1])/p[0]) - a*np.sinh((self.position_first[0, 0]+p[1])/a) - self.L
+            eq1 = p[0]*np.sinh((self.position_last[0, 0]+p[1])/p[0]) - p[0]*np.sinh((self.position_first[0, 0]+p[1])/p[0]) - self.L
             eq2 = p[0]*np.cosh((self.position_first[0, 0]+p[1])/p[0]) + p[2] - self.position_first[1, 0]
             eq3 = p[0]*np.cosh((self.position_last[0, 0]+p[1])/p[0]) + p[2] - self.position_last[1, 0]
             return [eq1, eq2, eq3]
 
-        self.init_p = fsolve(f, (1., (self.position_first[0, 0]+self.position_last[0, 0])/2, (self.position_first[1, 0]+self.position_last[1, 0])/2), factor=0.1)
+        initial_parameters = fsolve(f, (1., (self.position_first[0, 0]+self.position_last[0, 0])/2, (self.position_first[1, 0]+self.position_last[1, 0])/2))
 
-        # Initialise random positions for each TetherElements
-        for i in range(n):
-            xe = i * (self.position_last[0] - self.position_first[0]) / n
-            ye = i * (self.position_last[1] - self.position_first[1]) / n
-            ze = i * (self.position_last[2] - self.position_first[2]) / n
-            position = np.array([xe, ye, ze])
+        x_init = np.linspace(self.position_first[0, 0], self.position_last[0, 0], self.n)
+        y_init = np.linspace(self.position_first[1, 0], self.position_last[1, 0], self.n)
+        z_init = initial_parameters[0] * np.cosh((x_init+initial_parameters[1])/initial_parameters[0])+initial_parameters[2]
+
+        # Initialise positions for each TetherElements
+        for xe, ye, ze in zip(x_init, y_init, z_init):
+            position = np.array([[xe], [ye], [ze]])
             self.elements.append(TetherElement(self.element_mass, self.element_length, self.element_volume, position, self.config_filename))
         
         # Chaining elements
@@ -251,9 +252,9 @@ class Tether:
         self.ax.set_zlabel('Z')
 
         # Setting up axis limits and view
-        self.ax.set_xlim3d(-1, 4)
+        self.ax.set_xlim3d(10, 20)
         self.ax.set_ylim3d(-6, 6)
-        self.ax.set_zlim3d(-20, 0)
+        self.ax.set_zlim3d(-15, 5)
         self.ax.view_init(elev=20, azim=-50)
 
         # Creating n line object for each TetherElement
