@@ -20,6 +20,8 @@ The relative error is also very interesting because it makes it possible to be t
 
 The \textsc{Figure}~\ref{fig:error_length} shows us the average relative length error of the different links compared to the target length.
 
+The adjustment of the coefficients of the behavioral model is done as follows. First the $K_p$ is set to obtain an oscillating system with a bounded average link length. Then we add a derivative effect to remove oscillations on the system by increasing the coefficient $K_d$. Finally we add an integrator effect to remove a static error in order to make the length of the links reach the target length despite the presence of disturbances such as weight and buoyancy. This coefficient must be as large as possible in order to quickly converge but not to the point of destabilizing the system.
+
 \begin{figure}
     \centering
     \input{./plots/error_length.pgf}
