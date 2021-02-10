@@ -194,7 +194,7 @@ class Tether:
         ax_ek.plot(self.t, np.maximum(np.zeros(m.shape), m - 3*std), color="teal", linewidth=2)
         ax_ek.plot(self.t, m + 3*std, color="teal", linewidth=2)
 
-        ax_ek.set_title("Kinetic Energy")
+        # ax_ek.set_title("Kinetic Energy")
         ax_ek.grid()
         ax_ek.set_xlabel(r"Time (in $s$)")
         ax_ek.set_ylabel(r"Energy")
@@ -222,7 +222,7 @@ class Tether:
         ax_ep.plot(self.t, m - 3*std, color="teal", linewidth=2)
         ax_ep.plot(self.t, m + 3*std, color="teal", linewidth=2)
 
-        ax_ep.set_title("Potential Energy")
+        # ax_ep.set_title("Potential Energy")
         ax_ep.grid()
         ax_ep.set_xlabel(r"Time (in $s$)")
         ax_ep.set_ylabel(r"Energy")
@@ -310,16 +310,14 @@ class Tether:
 
 if __name__ == "__main__":
     T = Tether(25, 10, "./config/TetherElement.yaml")
-    T.process(0, 30, 1/20)
+    T.process(0, 50, 1/20)
 
+    T.monitor_length_error()
     T.monitor_potential_energy()
     T.monitor_kinetic_energy()
     T.monitor_energy()
     T.monitor_length()
-    T.monitor_length_error()
     T.monitor_angle()
-    import tikzplotlib
-    tikzplotlib.save("test.tex")
     plt.show()
     
     T.simulate()
