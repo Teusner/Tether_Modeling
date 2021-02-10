@@ -1,0 +1,81 @@
+Cette section va présenter les résultats de la simulation. Pour régler les différents coefficients de la simulation, nous allons avoir besoin de construire quelques outils nous permettant d'évaluer les performances d'un tel modèle.
+
+\subsection{Length of different links}
+
+It is useful to trace the length of the links over time in order to verify that the Tether's behavior is correct.
+
+The \textsc{Figure}~\ref{fig:length} shows in gray the plot of the length of each link for a simulation containing 15 nodes. In crimson is plotted the average of these lengths and in yellow the target length. Finally, the blue area shows the 95 \% confidence interval.
+
+\begin{figure}
+    \centering
+    \input{./plots/length.pgf}
+    \caption{Length of the links, average length and confidence interval}
+    \label{fig:length}
+\end{figure}
+
+As we can see, after setting the coefficients we are able to have a coherent behavior a few seconds after initialization. On average the link lengths converge towards the set length and the standard deviation is not too high. However, there are still some oscillations and not all links are exactly at the target length.
+
+\subsection{Relative error}
+The relative error is also very interesting because it makes it possible to be truly aware of the error but also to see more clearly when setting the coefficients of the behavioral model.
+
+The \textsc{Figure}~\ref{fig:error_length} shows us the average relative length error of the different links compared to the target length.
+
+\begin{figure}
+    \centering
+    \input{./plots/error_length.pgf}
+    \caption{Relative error between the target length and the mean length of links}
+    \label{fig:error_length}
+\end{figure}
+
+\subsection{Energetical approach}
+
+Finally, the energy approach is the most important to validate the simulation, because it carries the physical meaning of the system. The system must not have a divergent energy, which would be a physical counter-sense, but here, as there is no energy source, the overall energy must decrease over time, as soon as there is some fluid friction due to the drag force.
+
+\subsubsection{Kinetic Energy}
+
+The global kinetic energy of the Tether is calculated simply by summing the kinetic energies of the different TetherElements.
+
+$$E_{k} = \sum_{i=0}^N \left(\frac{1}{2} \cdot m \cdot v_i^2 \right)$$
+
+Where $v_i$ is the velocity of the $i^{th}$ element.
+
+\begin{figure}
+    \centering
+    \input{./plots/kinetic_energy.pgf}
+    \caption{Kinetic energy of the system}
+    \label{fig:kinetic_energy}
+\end{figure}
+
+\subsubsection{Potential Energy}
+
+To calculate the potential energy related to the application of a force on a solid, it is necessary to return to the definition of potential energy. Indeed we know that by noting $dt$ the time step of the simulation :
+
+$$\delta W(\overrightarrow{F}) = \overrightarrow{F} \cdot \overrightarrow{dOM} = \overrightarrow{F} \cdot \overrightarrow{v} \cdot dt$$
+
+$$E_p = \int_0^t \sum_{F_{ext}} \delta W(\overrightarrow{F_{ext}}) + cste$$
+
+Thus we are able to calculate the potential energy by calculating the sum of the elementary work of each force on the system, i.e. the forces that apply to each node, and then by integrating this quantity over time. We then have an expression of the potential energy of the system over time for the Tether which is defined to within a constant. This constant is initially set to $0$ in our case.
+
+The \textsc{Figure}~\ref{fig:potential_energy} shows us the evolution of potential energy over time. In gray is plotted the potential energy of each node, in crimson is the average potential energy and the blue area represents the 95 \% confidence interval. We see that the potential energy of the system does not diverge, and that the system tends to position itself in a minimum of potential energy. This is something that has a strong physical meaning because all real systems tend to put themselves in positions that minimize their potential energy. This seems to validate the behavior of our modeling on this point.
+
+\begin{figure}
+    \centering
+    \input{./plots/potential_energy.pgf}
+    \caption{Potential energy of the system over the time}
+    \label{fig:potential_energy}
+\end{figure}
+
+\subsubsection{Mechanical Energy}
+
+Finally, by summing the kinetic and potential energies previously calculated, we are able to define the mechanical energy of the system. This will give us information about the non-conservative forces that are included in this system. Indeed, the drag force will cause the system to lose energy since this energy will not be transformed into another form that can be used by the system, but will be dissipated as heat.
+
+The \textsc{Figure}~\ref{fig:energy} shows us the evolution of the mechanical energy over time. In gray is plotted the mechanical energy of each node, in crimson is the average mechanical energy and the blue area represents the 95 \% confidence interval.
+
+\begin{figure}
+    \centering
+    \input{./plots/energy.pgf}
+    \caption{Energy of the system}
+    \label{fig:energy}
+\end{figure}
+
+We can see that the energy of the system does not diverge, which seems to support the idea that the modeling is correct. Then, we notice that the system tends to minimize its energy, which is exactly the behavior expected for any system.
