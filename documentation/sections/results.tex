@@ -5,7 +5,7 @@ It is useful to trace the length of the links over time in order to verify that 
 
 The \textsc{Figure}~\ref{fig:length} shows in gray the plot of the length of each link for a simulation containing 15 nodes. In crimson is plotted the average of these lengths and in yellow the target length. Finally, the blue area shows the 95 \% confidence interval.
 
-\begin{figure}
+\begin{figure}[!htb]
     \centering
     \input{./plots/length.pgf}
     \caption{Length of the links, average length and confidence interval}
@@ -21,7 +21,7 @@ The \textsc{Figure}~\ref{fig:error_length} shows us the average relative length 
 
 The adjustment of the coefficients of the behavioral model is done as follows. First the $K_p$ is set to obtain an oscillating system with a bounded average link length. Then we add a derivative effect to remove oscillations on the system by increasing the coefficient $K_d$. Finally we add an integrator effect to remove a static error in order to make the length of the links reach the target length despite the presence of disturbances such as weight and buoyancy. This coefficient must be as large as possible in order to quickly converge but not to the point of destabilizing the system.
 
-\begin{figure}
+\begin{figure}[!htb]
     \centering
     \input{./plots/error_length.pgf}
     \caption{Relative error between the target length and the mean length of links}
@@ -40,7 +40,7 @@ $$E_{k} = \sum_{i=0}^N \left(\frac{1}{2} \cdot m \cdot v_i^2 \right)$$
 
 Where $v_i$ is the velocity of the $i^{th}$ element.
 
-\begin{figure}
+\begin{figure}[!htb]
     \centering
     \input{./plots/kinetic_energy.pgf}
     \caption{Kinetic energy of the system}
@@ -59,7 +59,7 @@ Thus we are able to calculate the potential energy by calculating the sum of the
 
 The \textsc{Figure}~\ref{fig:potential_energy} shows us the evolution of potential energy over time. In gray is plotted the potential energy of each node, in crimson is the average potential energy and the blue area represents the 95 \% confidence interval. We see that the potential energy of the system does not diverge, and that the system tends to position itself in a minimum of potential energy. This is something that has a strong physical meaning because all real systems tend to put themselves in positions that minimize their potential energy. This seems to validate the behavior of our modeling on this point.
 
-\begin{figure}
+\begin{figure}[!htb]
     \centering
     \input{./plots/potential_energy.pgf}
     \caption{Potential energy of the system over the time}
@@ -72,7 +72,7 @@ Finally, by summing the kinetic and potential energies previously calculated, we
 
 The \textsc{Figure}~\ref{fig:energy} shows us the evolution of the mechanical energy over time. In gray is plotted the mechanical energy of each node, in crimson is the average mechanical energy and the blue area represents the 95 \% confidence interval.
 
-\begin{figure}
+\begin{figure}[!htb]
     \centering
     \input{./plots/energy.pgf}
     \caption{Energy of the system}
