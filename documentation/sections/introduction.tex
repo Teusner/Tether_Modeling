@@ -1,8 +1,8 @@
-In the world of marine and underwater robotics we can indentify two categories of elements: mobile marine objects (MMO) and flexible tethers (FT). Mobile marine objects include surface vessels, submarines and remotely operated vehicles. Flexible tethers can represent umbilical cables, traction cables and anchor chains in the marine environment. They constitute all the necessary elements to achieve a mission in this environment which is sometimes quite difficult to explore.
+In the world of marine and underwater robotics we can indentify two categories of elements: mobile marine objects (MMO) and flexible tethers (FT)~\cite{blintsov_development_2017}. Mobile marine objects include surface vessels, submarines and remotely operated vehicles~\cite{jaulin_mobile_2019}. Flexible tethers can represent umbilical cables, traction cables and anchor chains in the marine environment. They constitute all the necessary elements to achieve a mission in this environment which is sometimes quite difficult to explore.
 
-The simulation of moving marine objects is something well known. We are now able to know from state equations the behavior of robots in their environment, and these equations are known for ships, submarines, sailboats, etc...
+The simulation of moving marine objects is something well known~\cite{ganoni_generalized_2018}. We are now able to know from state equations the behavior of robots in their environment, and these equations are known for ships, submarines, sailboats, etc...~\cite{jaulin_mobile_2019}
 
-On the other hand, determining the behavior of a flexible tether becomes more complicated. Indeed, the equation of motion of these objects involves non-linear partial differential equations and the motion between the different objects in the environment are dynamically dependent. It is well illustrated that if the boat moves, it will induce a motion in the flexible tether that will modify the trajectory of the remotely operated vehicle. This is why it is difficult to find a way to model flexible tethers in underwater environments.
+On the other hand, determining the behavior of a flexible tether becomes more complicated. Indeed, the equation of motion of these objects involves non-linear partial differential equations and the motion between the different objects in the environment are dynamically dependent~\cite{blintsov_development_2017}. It is well illustrated that if the boat moves, it will induce a motion in the flexible tether that will modify the trajectory of the remotely operated vehicle. This is why it is difficult to find a way to model flexible tethers in underwater environments.
 
 \begin{figure}
 	\centering
@@ -10,3 +10,5 @@ On the other hand, determining the behavior of a flexible tether becomes more co
 	\caption{Example of a complex underwater environment }
 	\label{fig:underwater_environment}
 \end{figure}
+
+The idea proposed in the scientific paper is to solve this problem using finite element simulation. This implies that we need to discretize the tether in order to simulate its global behavior.

@@ -2,4 +2,22 @@ Initialization is an important step because if the initial position of each Teth
 
 To initialize the different nodes, we use the catenary equation. The idea is to use the shape taken by a rope attached at the ends to two fixed coordinate points. This rope will want to minimize its energy and so it takes this shape. This chain should check the following second order differential equation.
 
-$$\ddot y = \sqrt{1 + \dot y}$$
+$$\ddot{z} = \frac{1}{k} \cdot \sqrt{1 + \dot{z}}$$
+
+The solutions are known and of the form :
+
+$$z(x) = k \cdot cosh\left(\frac{x}{k}\right)$$
+
+However, this solution shows a rope centered around the ordinate axis. This is not necessarily a situation that we will find in our simulation. Here we would like to set the two fixed extremities, noted $(x_1, y_1, z_1)$ and $(x_n, y_n, z_n)$. By introducing $c_1$, $c_2$ and $c_3$ three coefficients allowing to correctly place the rope, we will then want to find here an equation of the form :
+
+$$z(x) = c_1 \cdot cosh\left(\frac{x+c_2}{c_1}\right)+c_3$$
+
+To find these coefficients, we have at our disposal three conditions: the two conditions related to the end points and the length of the string which must be equal to $L$. These conditions are expressed by the following equations:
+
+\begin{align*}
+    L = & c_1 \cdot sinh\left(\dfrac{x_n+c_2}{c_1}\right) - c_1 \cdot sinh\left(\dfrac{x_1+c_2}{c_1}\right) \\
+    z_1 = & c_1 \cdot cosh\left(\dfrac{x_1+c_2}{c_1}\right)+c_3 \\
+    z_n = & c_1 \cdot cosh\left(\dfrac{x_n+c_2}{c_1}\right)+c_3
+\end{align*}
+
+It is possible to solve the system of equations numerically using the function \textit{fsolve} of the package \textit{scipy.optimize}. Finally, from the calculated coefficients, and by knowing the length between the first node and the $i^{th}$ node, it is possible to initialize the nodes by reusing the previous constraints but the unknowns become the position $x_i$ and $z_i$. Note that the constraint on the position of the first node brings nothing to the system of equations, which leads to a system of two equations with two unknowns. The $y_i$ of each TetherElement are linearly spaced between the two extremities.
