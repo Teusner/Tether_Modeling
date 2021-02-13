@@ -197,7 +197,7 @@ class Tether:
         # ax_ek.set_title("Kinetic Energy")
         ax_ek.grid()
         ax_ek.set_xlabel(r"Time (in $s$)")
-        ax_ek.set_ylabel(r"Energy")
+        ax_ek.set_ylabel(r"Energy (in $J$)")
         ax_ek.set_xlim(self.t0, self.tf)
         ax_ek.legend()
 
@@ -225,7 +225,7 @@ class Tether:
         # ax_ep.set_title("Potential Energy")
         ax_ep.grid()
         ax_ep.set_xlabel(r"Time (in $s$)")
-        ax_ep.set_ylabel(r"Energy")
+        ax_ep.set_ylabel(r"Energy (in $J$)")
         ax_ep.set_xlim(self.t0, self.tf)
         ax_ep.legend()
 
@@ -259,7 +259,7 @@ class Tether:
         #ax_energy.set_title("Energy")
         ax_energy.grid()
         ax_energy.set_xlabel(r"Time (in $s$)")
-        ax_energy.set_ylabel(r"Energy")
+        ax_energy.set_ylabel(r"Energy (in $J$)")
         ax_energy.set_xlim(self.t0, self.tf)
         ax_energy.legend()
 
