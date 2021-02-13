@@ -1,5 +1,7 @@
 .vscode/*
 
+*.mp4
+
 IEEEtran/*
 
 **__pycache__**
