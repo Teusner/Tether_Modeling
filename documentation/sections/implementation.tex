@@ -1,4 +1,4 @@
-The Python 3 implementation of this simulation is available in a GitHub repository~\cite{teusner_teusnertether_modeling_2021}. This code is based on Numpy~\cite{noauthor_numpy_nodate}, Matplotlib~\cite{noauthor_matplotlib_nodate} and Scipy~\cite{noauthor_scipyorg_nodate} modules. The goal of this simulator is to study the viability of such a system, in particular to validate the performance of the tether with this behavioral model.
+The Python 3 implementation of this simulation is available in a GitHub repository\footnote{Avalable at : \url{https://github.com/Teusner/Tether\_Modeling}}. This code is based on Numpy~\cite{noauthor_numpy_nodate}, Matplotlib~\cite{noauthor_matplotlib_nodate} and Scipy~\cite{noauthor_scipyorg_nodate} modules. The goal of this simulator is to study the viability of such a system, in particular to validate the performance of the tether with this behavioral model.
 
 So we will create a class \textit{TetherElement} which will represent a node. It will have to contain its mass, volume and distance information from its neighbors, but also its position, velocity and acceleration, as well as a pointer to each of its two neighbors. Finally it is necessary to have each coefficient $K_p$, $K_d$ and $K_i$ to compute $\overrightarrow{F_{t, p}}$ and $\overrightarrow{F_{t, n}}$.
 
@@ -8,37 +8,39 @@ A diagram of these two classes is visible on the \textsc{Figure}~\ref{fig:uml}. 
 
 \begin{figure}[!htb]
     \centering
-    \begin{tikzpicture}
-        \begin{class}[text width=6cm]{Tether}{0,0}
-            \attribute{+ element\_mass : double}
-            \attribute{+ element\_volume : double}
-            \attribute{+ element\_length : double}
-            \attribute{+ position\_first : numpy.ndarray}
-            \attribute{+ position\_last : numpy.ndarray}
-            \attribute{+ elements : list of \textit{TetherElement}}
-        \end{class}
-    
-        \begin{class}[text width=6cm]{TetherElement}{0,8.5}
-            \attribute{+ mass : double}
-            \attribute{+ volume : double}
-            \attribute{+ length : double}
-            \attribute{+ position : numpy.ndarray}
-            \attribute{+ velocity : numpy.ndarray}
-            \attribute{+ acceleration : numpy.ndarray}
-            \attribute{+ previous : TetherElement}
-            \attribute{+ next : TetherElement}
-            \attribute{+ K\_p : double}TetherElement
-            \attribute{+ K\_d : double}
-            \attribute{+ K\_i : double}
-            \operation{+ F\_p(self) : numpy.ndarray}
-            \operation{+ F\_b(self) : numpy.ndarray}
-            \operation{+ F\_f(self) : numpy.ndarray}
-            \operation{+ Ft\_prev(self) : numpy.ndarray}
-            \operation{+ Ft\_next(self) : numpy.ndarray}
-        \end{class}
-    
-        \aggregation{Tether}{}{~~~n}{TetherElement}
-    \end{tikzpicture}
+    \resizebox{0.45\textwidth}{!}{
+        \begin{tikzpicture}
+            \begin{class}[text width=6cm]{Tether}{0,0}
+                \attribute{+ element\_mass : double}
+                \attribute{+ element\_volume : double}
+                \attribute{+ element\_length : double}
+                \attribute{+ position\_first : numpy.ndarray}
+                \attribute{+ position\_last : numpy.ndarray}
+                \attribute{+ elements : list of \textit{TetherElement}}
+            \end{class}
+        
+            \begin{class}[text width=6cm]{TetherElement}{8.5,0}
+                \attribute{+ mass : double}
+                \attribute{+ volume : double}
+                \attribute{+ length : double}
+                \attribute{+ position : numpy.ndarray}
+                \attribute{+ velocity : numpy.ndarray}
+                \attribute{+ acceleration : numpy.ndarray}
+                \attribute{+ previous : TetherElement}
+                \attribute{+ next : TetherElement}
+                \attribute{+ K\_p : double}TetherElement
+                \attribute{+ K\_d : double}
+                \attribute{+ K\_i : double}
+                \operation{+ F\_p(self) : numpy.ndarray}
+                \operation{+ F\_b(self) : numpy.ndarray}
+                \operation{+ F\_f(self) : numpy.ndarray}
+                \operation{+ Ft\_prev(self) : numpy.ndarray}
+                \operation{+ Ft\_next(self) : numpy.ndarray}
+            \end{class}
+        
+            \aggregation{Tether}{}{~~~n}{TetherElement}
+        \end{tikzpicture}
+    }
     \caption{UML diagram of the \textit{Tether} and \textit{TetherElement} classes}
     \label{fig:uml}
 \end{figure}
