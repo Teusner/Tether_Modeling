@@ -1,4 +1,4 @@
-In the world of marine and underwater robotics we can indentify two categories of elements: mobile marine objects (MMO) and flexible tethers (FT)~\cite{fossen2011handbook,blintsov_development_2017}. Mobile marine objects include surface vessels, submarines and remotely operated vehicles~\cite{jaulin2019mobile}. Flexible tethers can represent umbilical cables, traction cables and anchor chains in the marine environment. They constitute all the necessary elements to achieve a mission in this environment which is sometimes quite difficult to explore.
+In the world of marine and underwater robotics, we can identify two categories of elements: mobile marine objects (MMO) and flexible tethers (FT)~\cite{blintsov_development_2017}. Mobile marine objects include surface vessels, submarines, and remotely operated vehicles~\cite{fossen2011handbook}. Flexible tethers can represent umbilical cables, traction cables, and anchor chains in the marine environment~\cite{fossen2011handbook}. They constitute all the necessary elements to achieve a mission in this environment. \textsc{Figure}~\ref{fig:underwater_environment} shows an example of a complex underwater environment as we could find in real conditions.
 
 The simulation of moving marine objects is something well known. We are now able to know from state equations the behavior of robots in their environment, and these equations are known for ships, submarines, sailboats, etc...~\cite{fossen2011handbook, jaulin2019mobile}
 
@@ -11,4 +11,8 @@ On the other hand, determining the behavior of a flexible tether becomes more co
 	\label{fig:underwater_environment}
 \end{figure}
 
-The idea proposed in the scientific paper is to solve this problem using finite element simulation. This implies that we need to discretize the tether in order to simulate its global behavior.
+Most of the existing solutions in terms of physical simulation are position-based simulations~\cite{bender_simulation_methods}. This is a field that is well found in the various references that propose flexible tether simulation methods. The idea is to make a simulation based on a discretization of the tether by finite elements, whose successive positions over time are calculated by a force-based approach~\cite{blintsov_development_2017,marshall,ganoni_unreal, koenemann_modeling_2017, prabhakar_dynamics_2005}.
+
+The problem induced by this method is that it is essential to know the force that each node applies to its neighbor, which is not necessarily known. Some use the equations of continuum mechanics to determine this force~\cite{koenemann_modeling_2017, prabhakar_dynamics_2005}, and others propose a method based on a proportional corrector on the erroneous distance between adjacent nodes~\cite{ganoni_unreal,blintsov_development_2017}.
+
+The idea proposed in this paper is to solve this problem using finite element simulation. This implies that we need to discretize the tether to simulate its global behavior.
