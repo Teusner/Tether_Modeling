@@ -2,25 +2,57 @@ Suppose we want to simulate a tether of length $L$. We will then divide it into 
 
 We will focus here on the case where the first node and the last node are immobile, because otherwise we would have to simulate a mobile marine object that would be attached at the end, which is not the goal of our study.
 
-Next, it is necessary to make a balance of the forces that apply to each tether element. For this simulation, we will take into account the weight, noted $\overrightarrow{F_g}$, the buoyancy, noted $\overrightarrow{F_b}$, and the force exerted by the previous element on the considered element, noted $\overrightarrow{F_{t, p}}$, as well as that of the next element, noted $\overrightarrow{F_{t, n}}$. The last force added to this model is the drag force noted $\overrightarrow{F_f}$
+Next, it is necessary to make a balance of the forces that apply to each tether element. For this simulation, we will take into account the weight, noted $\mathbf{w}$, the buoyancy, noted $\mathbf{b}$, the force exerted by the previous element on the considered element, noted $\mathbf{f_p}$, as well as that of the next element, noted $\mathbf{f_n}$, and the drag force, noted $\mathbf{d}$
 
 
 \begin{itemize}
-    \item \textbf{Weight $\overrightarrow{F_g}$} : Considering that each element has a mass $m$, we have : $$\overrightarrow{F_g} = \begin{bmatrix}0\\ 0\\ -m.g\end{bmatrix}$$
-    \item \textbf{Buoyancy $\overrightarrow{F_b}$} : If we note the volume of each element $V$ and $\rho$ the density of the fluid in which the tether is immersed, we have : $$\overrightarrow{F_b} = \begin{bmatrix}0\\ 0\\ \rho.V.g\end{bmatrix}$$
-    \item \textbf{Tether force $F_{t, p}$ and $F_{t, n}$} : It is difficult to find an analytical form to describe these two forces. Therefore, we must find a way to describe them. This is why we will use a behavioral model here. We know that each node will have to be at a distance $l$ from each of its neighbors. We can assume that the system behaves here as a three-dimensional damped mass-spring system and we will then consider that these forces are like elastic spring forces and viscous frictionnal forces.
+    \item \textbf{Weight $\mathbf{w}$} : Considering that each element has a mass $m$, and by noting $g$ the standard gravity, we have : $$\mathbf{w} = \begin{bmatrix}0\\ 0\\ -m.g\end{bmatrix}$$
+    \item \textbf{Buoyancy $\mathbf{b}$} : If we note the volume of each element $V$ and $\rho$ the density of the fluid in which the tether is immersed, we have : $$\mathbf{b} = \begin{bmatrix}0\\ 0\\ \rho.V.g\end{bmatrix}$$
+    \item \textbf{Tether force $\mathbf{f_p}$ and $\mathbf{f_n}$} : It is difficult to find an analytical form to describe these two forces. Therefore, we must find a way to describe them. This is why we will use a behavioral model here. We know that each node will have to be at a distance $l$ from each of its neighbors. We can assume that the system behaves here as a three-dimensional damped mass-spring system and we will then consider that these forces are like elastic spring forces and viscous frictionnal forces.
 
     By noting then $p_{p}$ the position of the previous node and $p_{c}$ the position of the current node, by introducing three coefficients $K_p$, $K_d$ and $K_i$ allowing to express the stiffness with which a node will correct its position with respect to its neighbors, we are able to express the behavioral model of these two forces:
     
-    $$\overrightarrow{F_{t}} = - \left(K_p \cdot e + K_d \cdot \dot e + K_i \cdot \int_{0}^te(\tau) \cdot d\tau \right) \cdot \overrightarrow{u}$$
+    $$\mathbf{f} = - \left(K_p \cdot e(t) + K_d \cdot \dot e(t) + K_i \cdot \int_{0}^te(\tau) \cdot d\tau \right) \cdot \mathbf{u}$$
     
-    In these expressions, it is assumed that $\overrightarrow{u}$ is the unitary vector oriented from the current node to the neighboring node, $e(t)$ is the error of position between two nodes, $\dot e$ is the derivative of this error and $\int_{0}^te(\tau) \cdot d\tau$ is the integral of this error. Both derivative and integral part will be estimated numerically respectively using the Euler's method and the rectangles method. We have therefore :
+    In these expressions, it is assumed that $\mathbf{u}$ is the unitary vector oriented from the current node to the neighboring node, $e$ is the error of position between two nodes, $\dot e$ is the derivative of this error and $\int_{0}^te(\tau) \cdot d\tau$ is the integral of this error. Both derivative and integral part will be estimated numerically respectively using the Euler's method and the rectangles method. We have therefore :
     
-    $$\overrightarrow{u} = \frac{\overrightarrow{p_c - p_p}}{\|p_c - p_p\|} \qquad e(t) = \frac{\|p_c - p_p\| - l}{\|p_c - p_p\|}$$
+    $$\mathbf{u} = \frac{\mathbf{p_c} - \mathbf{p_p}}{\|\mathbf{p_c} - \mathbf{p_p}\|} \qquad e(t) = \frac{\|\mathbf{p_c} - \mathbf{p_p}\| - l}{\|\mathbf{p_c} - \mathbf{p_p}\|}$$
     
-    These two forces $F_{t, p}$ and $F_{t, n}$ can therefore be expressed using the expression of $F_t$, taking care to take the correct current and previous element for each case.
+    These two forces $\mathbf{f_p}$ and $\mathbf{f_n}$ can therefore be expressed using the expression of $\mathbf{f}$, taking care to take the correct current and previous element for each case.
 
-    \item \textbf{Drag $\overrightarrow{F_f}$} : By noting $f$ the coefficient of viscous friction, $\overrightarrow{v}$ the velocity of each node and considering that the frictions are quadratic, we have : $$\overrightarrow{F_f} = -f \cdot \|\overrightarrow{v}\| \cdot \overrightarrow{v}$$
+    \item \textbf{Drag $\mathbf{d}$} : By noting $f$ the coefficient of viscous friction, $\mathbf{v}$ the velocity of each node and considering that the frictions are quadratic, we have : $$\mathbf{d} = -f \cdot \|\mathbf{v}\| \cdot \mathbf{v}$$
 \end{itemize}
 
 Thus we have expressed the forces necessary for the simulation of the tether.
+
+\begin{figure}
+    \centering
+    \begin{tikzpicture}
+        \tikzstyle{TetherElement}=[circle,draw,fill=RoyalBlue]
+        \tikzstyle{vector}=[-stealth,OrangeRed,very thick]
+
+        \foreach \x in {1, 2, 3, 4, 5}
+            \node[TetherElement] (T\x) at ({1.5*(\x-3)}, {8*cosh(0.25*(\x-3))}) {};
+
+        \draw[dotted] (T1) -- (T2);
+        \draw[] (T2) -- (T3) -- (T4);
+        \draw[dotted] (T4) -- (T5);
+
+        \node (w) at (0, 7) {};
+        \draw[vector] (T3) -- (w) node[yshift=-.6em]{$\mathbf{w}$};
+
+        \node (b) at (0, 9) {};
+        \draw[vector] (T3) -- (b) node[yshift=.6em]{$\mathbf{b}$};
+
+        \node (fp) at ($(T2)!.3!(T3)$) {};
+        \draw[vector] (T3) -- (fp) node[yshift=1em]{$\mathbf{f_p}$};
+
+        \node (fn) at ($(T3)!.7!(T4)$) {};
+        \draw[vector] (T3) -- (fn) node[yshift=1em]{$\mathbf{f_n}$};
+
+        \node (d) at (-0.8, 7.4) {};
+        \draw[vector] (T3) -- (d) node[xshift=-.2em]{$\mathbf{d}$};
+    \end{tikzpicture}
+    \caption{Modelization of the problem}
+    \label{fig:modelisation}
+\end{figure}
