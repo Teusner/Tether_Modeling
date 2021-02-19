@@ -32,17 +32,16 @@ Thus we have expressed the forces necessary for the simulation of the tether.
         \tikzstyle{vector}=[-stealth,OrangeRed,very thick]
 
         \foreach \x in {1, 2, 3, 4, 5}
-            \node[TetherElement] (T\x) at ({1.5*(\x-3)}, {8*cosh(0.25*(\x-3))}) {};
+            \node[TetherElement] (T\x) at ({1.5*(\x-3)+3.5}, {8*cosh(0.25*(\x-3))-7}) {};
 
         \draw[dotted] (T1) -- (T2);
         \draw[] (T2) -- (T3) -- (T4);
         \draw[dotted] (T4) -- (T5);
 
-        \node (w) at (0, 7) {};
-        \draw[vector] (T3) -- (w) node[yshift=-.6em]{$\mathbf{w}$};
-
-        \node (b) at (0, 9) {};
-        \draw[vector] (T3) -- (b) node[yshift=.6em]{$\mathbf{b}$};
+        \draw[vector] (T3) -- +(270:1cm) node[yshift=-.6em]{$\mathbf{w}$};
+        \draw[vector] (T3) -- +(90:1cm) node[yshift=.6em]{$\mathbf{b}$};
+        \draw[vector] (T3) -- +(225:0.8cm) node[xshift=-.4em]{$\mathbf{d}$};
+        \draw[vector,RoyalPurple] (T3) -- +(45:1cm) node[xshift=.2em,yshift=.4em]{$\mathbf{v}$};
 
         \node (fp) at ($(T2)!.3!(T3)$) {};
         \draw[vector] (T3) -- (fp) node[yshift=1em]{$\mathbf{f_p}$};
@@ -51,7 +50,11 @@ Thus we have expressed the forces necessary for the simulation of the tether.
         \draw[vector] (T3) -- (fn) node[yshift=1em]{$\mathbf{f_n}$};
 
         \node (d) at (-0.8, 7.4) {};
-        \draw[vector] (T3) -- (d) node[xshift=-.2em]{$\mathbf{d}$};
+        
+
+        \draw[->,red,very thick] (0,0) -- (-0.4,-0.6) node[left] {$\mathbf{x}$}; 
+        \draw[->,ForestGreen,very thick] (0,0) -- (1,0) node[above left] {$\mathbf{y}$}; 
+        \draw[->,MidnightBlue,very thick] (0,0) -- (0,1) node[above] {$\mathbf{z}$}; 
     \end{tikzpicture}
     \caption{Modelization of the problem}
     \label{fig:modelisation}
