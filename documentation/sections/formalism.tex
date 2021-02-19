@@ -29,27 +29,31 @@ Thus we have expressed the forces necessary for the simulation of the tether.
     \centering
     \begin{tikzpicture}
         \tikzstyle{TetherElement}=[circle,draw,fill=RoyalBlue]
-        \tikzstyle{vector}=[-stealth,OrangeRed,very thick]
+        \tikzstyle{Link}=[thick,black]
+        \tikzstyle{vector}=[-stealth,Red,very thick]
+        \tikzset{ext/.pic={
+            \path [fill=white] (-0.2,0)to[bend left](0,0.1)to[bend right](0.2,0.2)to(0.2,0)to[bend left](0,-0.1)to[bend right](-0.2,-0.2)--cycle;
+            \draw (-0.2,0)to[bend left](0,0.1)to[bend right](0.2,0.2) (0.2,0)to[bend left](0,-0.1)to[bend right](-0.2,-0.2);
+        }}
 
         \foreach \x in {1, 2, 3, 4, 5}
             \node[TetherElement] (T\x) at ({1.5*(\x-3)+3.5}, {8*cosh(0.25*(\x-3))-7}) {};
 
-        \draw[dotted] (T1) -- (T2);
-        \draw[] (T2) -- (T3) -- (T4);
-        \draw[dotted] (T4) -- (T5);
-
-        \draw[vector] (T3) -- +(270:1cm) node[yshift=-.6em]{$\mathbf{w}$};
-        \draw[vector] (T3) -- +(90:1cm) node[yshift=.6em]{$\mathbf{b}$};
-        \draw[vector] (T3) -- +(225:0.8cm) node[xshift=-.4em]{$\mathbf{d}$};
-        \draw[vector,RoyalPurple] (T3) -- +(45:1cm) node[xshift=.2em,yshift=.4em]{$\mathbf{v}$};
-
+        \draw[Link] (T1) -- pic[rotate=45,scale=0.6] {ext} (T2);
+        \draw[Link] (T2) -- (T3) -- (T4);
+        \draw[Link] (T4) -- pic[rotate=-70,scale=0.6] {ext} (T5);
+        
         \node (fp) at ($(T2)!.3!(T3)$) {};
         \draw[vector] (T3) -- (fp) node[yshift=1em]{$\mathbf{f_p}$};
 
         \node (fn) at ($(T3)!.7!(T4)$) {};
         \draw[vector] (T3) -- (fn) node[yshift=1em]{$\mathbf{f_n}$};
+        \draw[vector] (T3) -- +(270:1cm) node[yshift=-.6em]{$\mathbf{w}$};
+        \draw[vector] (T3) -- +(90:1cm) node[yshift=.6em]{$\mathbf{b}$};
+        \draw[vector] (T3) -- +(225:0.8cm) node[xshift=-.4em]{$\mathbf{d}$};
+        \draw[vector,ForestGreen] (T3) -- +(45:1cm) node[xshift=.2em,yshift=.4em]{$\mathbf{v}$};
 
-        \node (d) at (-0.8, 7.4) {};
+
         
 
         \draw[->,red,very thick] (0,0) -- (-0.4,-0.6) node[left] {$\mathbf{x}$}; 
