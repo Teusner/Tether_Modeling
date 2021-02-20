@@ -23,7 +23,7 @@ Next, it is necessary to make a balance of the forces that apply to each tether 
     \item \textbf{Drag $\mathbf{d}$} : By noting $f$ the coefficient of viscous friction, $\mathbf{v}$ the velocity of each node and considering that the frictions are quadratic, we have : $$\mathbf{d} = -f \cdot \|\mathbf{v}\| \cdot \mathbf{v}$$
 \end{itemize}
 
-Thus we have expressed the forces necessary for the simulation of the tether.
+Thus we have expressed the forces necessary for the simulation of the tether. \textsc{Figure}~\ref{fig:modelization} shows us the modelization of the tether. We see the different TetherElements represented in blue. For clarity reasons, the different forces are represented only on one node but must be computed for each node. The speed of the node is noted $\mathbf{v}$. Finally, in order not to fully draw the tether, the representation has been deliberately cut after the first node and before the last node to represent only three central nodes.
 
 \begin{figure}
     \centering
@@ -51,15 +51,15 @@ Thus we have expressed the forces necessary for the simulation of the tether.
         \draw[vector] (T3) -- +(270:1cm) node[yshift=-.6em]{$\mathbf{w}$};
         \draw[vector] (T3) -- +(90:1cm) node[yshift=.6em]{$\mathbf{b}$};
         \draw[vector] (T3) -- +(225:0.8cm) node[xshift=-.4em]{$\mathbf{d}$};
-        \draw[vector,ForestGreen] (T3) -- +(45:1cm) node[xshift=.2em,yshift=.4em]{$\mathbf{v}$};
+        \draw[vector,Green] (T3) -- +(45:1cm) node[xshift=.2em,yshift=.4em]{$\mathbf{v}$};
 
 
         
 
         \draw[->,red,very thick] (0,0) -- (-0.4,-0.6) node[left] {$\mathbf{x}$}; 
-        \draw[->,ForestGreen,very thick] (0,0) -- (1,0) node[above left] {$\mathbf{y}$}; 
-        \draw[->,MidnightBlue,very thick] (0,0) -- (0,1) node[above] {$\mathbf{z}$}; 
+        \draw[->,Green,very thick] (0,0) -- (1,0) node[above left] {$\mathbf{y}$}; 
+        \draw[->,blue,very thick] (0,0) -- (0,1) node[above] {$\mathbf{z}$}; 
     \end{tikzpicture}
     \caption{Modelization of the problem}
-    \label{fig:modelisation}
+    \label{fig:modelization}
 \end{figure}
