@@ -3,14 +3,6 @@ import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d.axes3d as p3
 import matplotlib.animation as animation
 
-matplotlib.use("pgf")
-matplotlib.rcParams.update({
-    "pgf.texsystem": "pdflatex",
-    'font.family': 'serif',
-    'text.usetex': True,
-    'pgf.rcfonts': False,
-})
-
 from scipy.optimize import fsolve
 
 import numpy as np
@@ -112,10 +104,8 @@ class Tether:
 
         fig_length.set_size_inches(w=3.5, h=2.8)
         plt.tight_layout()
-        plt.savefig('./documentation/plots/length.pgf')
-
-        # mngr = plt.get_current_fig_manager()
-        # mngr.window.setGeometry(0, 0, 600, 450)
+        
+        return fig_length, ax_length
 
     def monitor_length_error(self):
         fig_length_error, ax_length_error = plt.subplots()
@@ -140,13 +130,11 @@ class Tether:
 
         fig_length_error.set_size_inches(w=3.5, h=2.8)
         plt.tight_layout()
-        plt.savefig('./documentation/plots/error_length.pgf')
 
-        # mngr = plt.get_current_fig_manager()
-        # mngr.window.setGeometry(600, 0, 800, 450)
+        return fig_length_error, ax_length_error
 
     def monitor_angle(self):
-        _, ax_angle = plt.subplots()
+        fig_angle, ax_angle = plt.subplots()
         total_angle = []
 
         for e in self.elements:
@@ -167,15 +155,14 @@ class Tether:
 
         ax_angle.plot(self.t, np.pi/2*np.ones(self.t.shape), color="orange", label="reference angle", linewidth=2)
 
-        ax_angle.set_title("Angle between links")
+        # ax_angle.set_title("Angle between links")
         ax_angle.grid()
         ax_angle.set_xlabel(r"Time (in $s$)")
         ax_angle.set_ylabel(r"Angle (in $rad$)")
         ax_angle.set_xlim(self.t0, self.tf)
         ax_angle.legend()
 
-        # mngr = plt.get_current_fig_manager()
-        # mngr.window.setGeometry(0, 500, 600, 450)
+        return fig_angle, ax_angle
 
     def monitor_kinetic_energy(self):
         fig_ek, ax_ek = plt.subplots()
@@ -203,7 +190,8 @@ class Tether:
 
         fig_ek.set_size_inches(w=3.5, h=2.8)
         plt.tight_layout()
-        plt.savefig('./documentation/plots/kinetic_energy.pgf')
+
+        return fig_ek, ax_ek
 
     def monitor_potential_energy(self):
         fig_ep, ax_ep = plt.subplots()
@@ -231,7 +219,8 @@ class Tether:
 
         fig_ep.set_size_inches(w=3.5, h=2.8)
         plt.tight_layout()
-        plt.savefig('./documentation/plots/potential_energy.pgf')
+        
+        return fig_ep, ax_ep
 
     def monitor_energy(self):
         fig_energy, ax_energy = plt.subplots()
@@ -265,7 +254,8 @@ class Tether:
 
         fig_energy.set_size_inches(w=3.5, h=2.8)
         plt.tight_layout()
-        plt.savefig('./documentation/plots/energy.pgf')
+        
+        return fig_energy, ax_energy
     
     def simulate(self, save=False, filename="tether.mp4"):
         # Attaching 3D axis to the figure 
@@ -311,14 +301,6 @@ class Tether:
 if __name__ == "__main__":
     T = Tether(25, 10, "./config/TetherElement.yaml")
     T.process(0, 50, 1/20)
-
-    T.monitor_length_error()
-    T.monitor_potential_energy()
-    T.monitor_kinetic_energy()
-    T.monitor_energy()
-    T.monitor_length()
-    T.monitor_angle()
-    plt.show()
     
     T.simulate()
     plt.show()
