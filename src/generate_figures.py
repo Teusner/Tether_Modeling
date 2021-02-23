@@ -49,3 +49,6 @@ if __name__ == "__main__":
     T.fig.suptitle('')
     fig_simulation.set_size_inches(w=4.5, h=3.2)
     fig_simulation.savefig('./documentation/plots/simulation.pgf')
+
+    # Simulation video
+    T.simulate(save=True, filename="./video/tether.mp4")
