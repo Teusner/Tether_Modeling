@@ -300,7 +300,10 @@ class Tether:
 
 if __name__ == "__main__":
     T = Tether(25, 10, "./config/TetherElement.yaml")
-    T.process(0, 50, 1/20)
-    
+    T.process(0, 500, 1/20)
+
+    fig_length_error, ax_length_error = T.monitor_length_error()
+    plt.show()
+
     T.simulate()
     plt.show()

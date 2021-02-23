@@ -16,7 +16,7 @@ if __name__ == "__main__":
 
     # Simulation
     T = Tether(25, 10, "./config/TetherElement.yaml")
-    T.process(0, 50, 1/20)
+    T.process(0, 100, 1/20)
 
     # Length figure
     fig_length, ax_length = T.monitor_length()
@@ -51,4 +51,4 @@ if __name__ == "__main__":
     fig_simulation.savefig('./documentation/plots/simulation.pgf')
 
     # Simulation video
-    T.simulate(save=True, filename="./video/tether.mp4")
+    # T.simulate(save=True, filename="./video/tether.mp4")

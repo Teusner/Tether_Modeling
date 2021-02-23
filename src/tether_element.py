@@ -129,7 +129,7 @@ class TetherElement:
         if self.previous is not None:
             lm = np.linalg.norm(self.get_position() - self.previous.get_position())
             u = (self.previous.get_position() - self.get_position()) / lm
-            force = - ( self.kp * (self.length - lm) / self.length + self.kd * (lm - self.previous_length) / h - self.ki * self.previous_int) * u
+            force = - ( self.kp * (self.length - lm) / self.length + self.kd * (lm - self.previous_length) / h + self.ki * self.previous_int) * u
             self.previous_length = lm
             self.previous_int += h * (self.length - lm) / lm
             return force
@@ -140,7 +140,7 @@ class TetherElement:
         if self.next is not None:
             lm = np.linalg.norm(self.next.get_position() - self.get_position())
             u = (self.next.get_position() - self.get_position()) / lm
-            force = - ( self.kp * (self.length - lm) / self.length + self.kd * (lm - self.next_length) / h - self.ki * self.next_int) * u
+            force = - ( self.kp * (self.length - lm) / self.length + self.kd * (lm - self.next_length) / h + self.ki * self.next_int) * u
             self.next_length = lm
             self.next_int += h * (self.length - lm) / lm
             return force
