@@ -15,8 +15,8 @@ if __name__ == "__main__":
     })
 
     # Simulation
-    T = Tether(25, 10, "./config/TetherElement.yaml")
-    T.process(0, 100, 1/20)
+    T = Tether(25, 11, "./config/TetherElement.yaml")
+    T.process(0, 50, 1/20)
 
     # Length figure
     fig_length, ax_length = T.monitor_length()
