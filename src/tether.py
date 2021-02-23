@@ -13,7 +13,6 @@ from tether_element import TetherElement
 ### TODO
 # Fixing n / L / number of TetherElement per meters
 # Adding extermities forces to see forces which are going to be applied to the MMO
-# Better behavioral force and torque with correct PID
 
 class Tether:
     def __init__(self, L, n, config_filename):
@@ -31,8 +30,8 @@ class Tether:
         self.element_volume = np.pi*0.005**2*self.element_length
 
         # Extremities
-        self.position_first = np.array([[12.], [-2.], [5.]])
-        self.position_last = np.array([[18.], [2.], [0.]])
+        self.position_first = np.array([[12.], [0], [10.]])
+        self.position_last = np.array([[18.], [0], [0.]])
 
         def f(p):
             eq1 = p[0]*np.sinh((self.position_last[0, 0]+p[1])/p[0]) - p[0]*np.sinh((self.position_first[0, 0]+p[1])/p[0]) - self.L
@@ -41,16 +40,22 @@ class Tether:
             return [eq1, eq2, eq3]
 
         initial_parameters = fsolve(f, (1., (self.position_first[0, 0]+self.position_last[0, 0])/2, (self.position_first[1, 0]+self.position_last[1, 0])/2))
+        print(initial_parameters)
 
-        x_init = np.linspace(self.position_first[0, 0], self.position_last[0, 0], self.n)
-        y_init = np.linspace(self.position_first[1, 0], self.position_last[1, 0], self.n)
-        z_init = initial_parameters[0] * np.cosh((x_init+initial_parameters[1])/initial_parameters[0])+initial_parameters[2]
+        def g(p, i):
+            eq1 = initial_parameters[0]*np.sinh((p[0]+initial_parameters[1])/initial_parameters[0]) - initial_parameters[0]*np.sinh((self.position_first[0, 0]+initial_parameters[1])/initial_parameters[0]) - i * self.L / (self.n)
+            eq2 = initial_parameters[0]*np.cosh((p[0]+initial_parameters[1])/initial_parameters[0]) + initial_parameters[2] - p[2]
+            eq3 = self.position_first[1, 0] + i * (self.position_last[1, 0] - self.position_first[1, 0]) / (self.n-1) - p[1]
+            return [eq1, eq2, eq3]
 
         # Initialise positions for each TetherElements
-        for xe, ye, ze in zip(x_init, y_init, z_init):
-            position = np.array([[xe], [ye], [ze]])
+        self.elements.append(TetherElement(self.element_mass, self.element_length, self.element_volume, self.position_first, self.config_filename))
+        for i in range(1, self.n-1):
+            position = fsolve(g, self.position_first, args=(i)).reshape(3, 1)
+            print(position.flatten())
             self.elements.append(TetherElement(self.element_mass, self.element_length, self.element_volume, position, self.config_filename))
-        
+        self.elements.append(TetherElement(self.element_mass, self.element_length, self.element_volume, self.position_last, self.config_filename))
+
         # Chaining elements
         for i in range(1, n-1):
             self.elements[i].previous = self.elements[i-1]
