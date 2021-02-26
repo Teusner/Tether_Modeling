@@ -42,7 +42,7 @@ class Tether:
             return [eq1, eq2, eq3]
 
         initial_parameters = fsolve(f, (1., (self.position_first[0, 0]+self.position_last[0, 0])/2, (self.position_first[1, 0]+self.position_last[1, 0])/2))
-        print(initial_parameters)
+        # print(initial_parameters)
 
         def g(p, i):
             eq1 = initial_parameters[0]*np.sinh((p[0]+initial_parameters[1])/initial_parameters[0]) - initial_parameters[0]*np.sinh((self.position_first[0, 0]+initial_parameters[1])/initial_parameters[0]) - i * self.L / (self.n)
@@ -54,7 +54,7 @@ class Tether:
         self.elements.append(TetherElement(self.element_mass, self.element_length, self.element_volume, self.position_first, self.config_filename))
         for i in range(1, self.n-1):
             position = fsolve(g, self.position_first, args=(i)).reshape(3, 1)
-            print(position.flatten())
+            # print(position.flatten())
             self.elements.append(TetherElement(self.element_mass, self.element_length, self.element_volume, position, self.config_filename))
         self.elements.append(TetherElement(self.element_mass, self.element_length, self.element_volume, self.position_last, self.config_filename))
 
@@ -264,6 +264,15 @@ class Tether:
         
         return fig_energy, ax_energy
     
+    def get_arrow(self, theta):
+        x = np.cos(theta)
+        y = np.sin(theta)
+        z = 0
+        u = np.sin(2*theta)
+        v = np.sin(3*theta)
+        w = np.cos(3*theta)
+        return x,y,z,u,v,w
+
     def simulate(self, save=False, filename="tether.mp4"):
         # Attaching 3D axis to the figure 
         self.fig = plt.figure() 
@@ -286,6 +295,10 @@ class Tether:
         # Creating n line object for each TetherElement
         self.graph, = self.ax.plot([], [], [], color="teal", marker="o")
 
+        # Creating Quivers
+        x, y, z, u, v, w = self.position_first.flatten().tolist() + [1, 1, 1]
+        self.first_quiver = self.ax.quiver(x, y, z, u, v, w, color="crimson")
+
         # Creating 3D animation
         self.ani = animation.FuncAnimation(self.fig, self.animate, frames=int((self.tf-self.t0)/self.h), interval=self.h*1000, blit=True, repeat=False)
 
@@ -302,15 +315,17 @@ class Tether:
             Z.append(e.position[i][2][0])
         self.graph.set_data(np.asarray(X), np.asarray(Y))
         self.graph.set_3d_properties(np.asarray(Z))
+        # print(X[0], Y[0], Z[0])
+        # self.first_quiver.set_offsets([X[0], Y[0], Z[0]])
         return self.graph,
 
 
 if __name__ == "__main__":
     T = Tether(25, 11, "./config/TetherElement.yaml")
-    T.process(0, 40, 1/20)
+    T.process(0, 5, 1/20)
 
-    fig_length_error, ax_length_error = T.monitor_length_error()
-    plt.show()
+    # fig_length_error, ax_length_error = T.monitor_length_error()
+    # plt.show()
 
     T.simulate()
     plt.show()
