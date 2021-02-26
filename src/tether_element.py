@@ -3,9 +3,12 @@ import uuid
 import yaml
 
 ### TODO
-# Add cleaned up behavioral model
 # Cleaning the force mask
-# Cleaning the acceleration processing part
+# Cleaning the acceleration processing part using array
+# Better integration of acceleration and velocity
+# Adding orientation to state of TetherElement
+# Cleaning config.yaml
+# Adding Tether twist moment along the Tether
 
 class TetherElement:
     # Physical constants of the system
