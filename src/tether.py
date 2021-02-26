@@ -13,6 +13,8 @@ from tether_element import TetherElement
 ### TODO
 # Fixing n / L / number of TetherElement per meters
 # Adding extermities forces to see forces which are going to be applied to the MMO
+# Enhance visual representation
+# Using double linked list and exec {for i in range(10): exec("obj{} = Stock(name, price)".format(i))} to instantiate TetherElements
 
 class Tether:
     def __init__(self, L, n, config_filename):
