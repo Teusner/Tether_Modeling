@@ -295,10 +295,6 @@ class Tether:
         # Creating n line object for each TetherElement
         self.graph, = self.ax.plot([], [], [], color="teal", marker="o")
 
-        # Creating Quivers
-        x, y, z, u, v, w = self.position_first.flatten().tolist() + [1, 1, 1]
-        self.first_quiver = self.ax.quiver(x, y, z, u, v, w, color="crimson")
-
         # Creating 3D animation
         self.ani = animation.FuncAnimation(self.fig, self.animate, frames=int((self.tf-self.t0)/self.h), interval=self.h*1000, blit=True, repeat=False)
 
@@ -315,8 +311,6 @@ class Tether:
             Z.append(e.position[i][2][0])
         self.graph.set_data(np.asarray(X), np.asarray(Y))
         self.graph.set_3d_properties(np.asarray(Z))
-        # print(X[0], Y[0], Z[0])
-        # self.first_quiver.set_offsets([X[0], Y[0], Z[0]])
         return self.graph,
 
 
