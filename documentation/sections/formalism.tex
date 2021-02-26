@@ -20,8 +20,8 @@ Next, it is necessary to make a balance of the forces that apply to each tether 
     
     These two forces $\mathbf{f_p}$ and $\mathbf{f_n}$ can therefore be expressed using the expression of $\mathbf{f}$, taking care to take the correct current and previous element for each case.
 
-    \item \textbf{Drag $\mathbf{d}$} : By noting $f$ the coefficient of viscous friction, $\mathbf{v}$ the velocity of each node and considering that the frictions are quadratic, we have : $$\mathbf{d} = -f \cdot \|\mathbf{v}\| \cdot \mathbf{v}$$
-\end{itemize}
+    \item \textbf{Drag $\mathbf{d}$} : By noting $A$ the cross section area, $C_D$ the drag coefficient, $\rho$ the density of fluid, and $\mathbf{v}$ the velocity of the node we have : $$\mathbf{d} = - \frac{1}{2} \cdot \rho \cdot A \cdot C_D \cdot \|\mathbf{v}\| \cdot \mathbf{v}$$
+\end{itemize}3
 
 Thus we have expressed the forces necessary for the simulation of the tether. \textsc{Figure}~\ref{fig:modelization} shows us the modelization of the tether. We see the different TetherElements represented in blue. For clarity reasons, the different forces are represented only on one node but must be computed for each node. The speed of the node is noted $\mathbf{v}$. Finally, in order not to fully draw the tether, the representation has been deliberately cut after the first node and before the last node to represent only three central nodes.
 
