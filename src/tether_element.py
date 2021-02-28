@@ -170,7 +170,7 @@ class TetherElement:
             return np.zeros((3, 1))
         else:
             self.v = (u_previous + u_next) / np.linalg.norm(u_previous + u_next)
-            return (self.Tp*e + self.Td*de + self.Ti*self.E_torque) * self.v
+            return - (self.Tp*e + self.Td*de + self.Ti*self.E_torque) * self.v
 
     def dW(self, h):
         W = self.velocity[-1].T @ np.hstack((self.Fg(), self.Fb(), self.Ft_prev(h), self.Ft_next(h), self.Ff(), self.Fs(h)))

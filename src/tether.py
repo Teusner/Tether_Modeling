@@ -32,8 +32,8 @@ class Tether:
         self.element_volume = np.pi*0.005**2*self.element_length
 
         # Extremities
-        self.position_first = np.array([[12.], [0], [10.]])
-        self.position_last = np.array([[18.], [0], [0.]])
+        self.position_first = np.array([[12.], [0], [0.]])
+        self.position_last = np.array([[15.], [0], [0.]])
 
         def f(p):
             eq1 = p[0]*np.sinh((self.position_last[0, 0]+p[1])/p[0]) - p[0]*np.sinh((self.position_first[0, 0]+p[1])/p[0]) - self.L
