@@ -4,7 +4,6 @@ import yaml
 
 ### TODO
 # Cleaning the force mask
-# Adding orientation to state of TetherElement
 # Cleaning config.yaml
 # Adding Tether twist moment along the Tether
 
