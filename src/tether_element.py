@@ -20,6 +20,7 @@ class TetherElement:
         self.uuid = uuid.uuid4()
         self.previous = None
         self.next = None
+        self.is_extremity = False
 
         # Physical parameters of the TetherElement
         self.mass = mass
@@ -112,12 +113,12 @@ class TetherElement:
         forces = np.hstack((self.Fg(), self.Fb(), self.Ft_prev(h),  self.Ft_next(h), self.Ff(), self.Fs(h)))
         self.acceleration.append(np.clip(1 / self.mass * ((forces[:, self.forces_mask]) @ np.ones((6, 1))), -self.acceleration_limit, self.acceleration_limit))
         
-        if self.previous is not None and self.next is not None:
-            self.velocity.append(self.get_velocity() + h * self.get_acceleration())
-            self.position.append(self.get_position() + h * self.get_velocity())
-        else:
+        if self.is_extremity:
             self.velocity.append(self.get_velocity())
             self.position.append(self.get_position())
+        else:
+            self.velocity.append(self.get_velocity() + h * self.get_acceleration())
+            self.position.append(self.get_position() + h * self.get_velocity())
             
         self.Ek.append(self.mass/2*(self.get_velocity().T@self.get_velocity())[0,0])
         self.Ep.append(self.Ep[-1] + self.dW(h))
