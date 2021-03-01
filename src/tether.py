@@ -12,7 +12,7 @@ from tether_element import TetherElement
 
 ### TODO
 # Fixing n / L / number of TetherElement per meters
-# Adding extermities forces to see forces which are going to be applied to the MMO
+# Adding extermities forces monitoring to see forces which are going to be applied to the MMO
 # Enhance visual representation
 # Using double linked list and exec {for i in range(10): exec("obj{} = Stock(name, price)".format(i))} to instantiate TetherElements
 
@@ -187,7 +187,7 @@ class Tether:
         ax_shape.plot(self.t, m - 3*std, color="teal", linewidth=2)
         ax_shape.plot(self.t, m + 3*std, color="teal", linewidth=2)
 
-        ax_angle.plot(self.t, np.pi/2*np.ones(self.t.shape), color="orange", label="reference angle", linewidth=2)
+        ax_shape.plot(self.t, np.pi/2*np.ones(self.t.shape), color="orange", label="reference angle", linewidth=2)
 
         # ax_angle.set_title("Angle between links")
         ax_shape.grid()
