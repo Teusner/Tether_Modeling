@@ -111,7 +111,8 @@ class TetherElement:
     def step(self, h):
         # Compute acceleration
         forces = np.hstack((self.Fg(), self.Fb(), self.Ft_prev(h),  self.Ft_next(h), self.Ff(), self.Fs(h)))
-        self.acceleration.append(np.clip(1 / self.mass * ((forces[:, self.forces_mask]) @ np.ones((6, 1))), -self.acceleration_limit, self.acceleration_limit))
+        forces = forces[:, self.forces_mask]
+        self.acceleration.append(np.clip(1 / self.mass * (np.sum(forces, axis=1).reshape(3, 1)), -self.acceleration_limit, self.acceleration_limit))
         
         if self.is_extremity:
             self.velocity.append(self.get_velocity())
@@ -131,11 +132,23 @@ class TetherElement:
 
     def Ft_prev(self, h):
         if self.previous is not None:
+            # Current lenght
             lm = np.linalg.norm(self.get_position() - self.previous.get_position())
+
+            # Force support vector
             u = (self.previous.get_position() - self.get_position()) / lm
-            force = - ( self.kp * (self.length - lm) + self.kd * (lm - self.previous_length) / h + self.ki * self.previous_int) * u
+
+            # Error computing
+            e = self.length - lm
+            de = (lm - self.previous_length) / h
+
+            # Processing the force
+            force = - ( self.kp * e + self.kd * de - self.ki * self.previous_int) * u
+
+            # Updating values
             self.previous_length = lm
             self.previous_int += h * (self.length - lm) / lm
+
             return force
         else :
             return np.zeros((3, 1))
@@ -144,9 +157,9 @@ class TetherElement:
         if self.next is not None:
             lm = np.linalg.norm(self.next.get_position() - self.get_position())
             u = (self.next.get_position() - self.get_position()) / lm
-            force = - ( self.kp * (self.length - lm) + self.kd * (lm - self.next_length) / h + self.ki * self.next_int) * u
+            force = - ( self.kp * (self.length - lm) + self.kd * (lm - self.next_length) / h - self.ki * self.next_int) * u
             self.next_length = lm
-            self.next_int += h * (self.length - lm) / lm
+            self.next_int += h * (self.length - lm)
             return force
         else :
             return np.zeros((3, 1))
