@@ -97,6 +97,12 @@ class TetherElement:
         else:
             return np.asarray(self.state_history[-1])[:3]
 
+    def get_angle(self, i=None):
+        if i is not None:
+            return np.asarray(self.state_history[i])[3]
+        else:
+            return np.asarray(self.state_history[-1])[33]
+
     def get_velocity(self):
         return np.asarray(self.state_history[-1])[4:7]
 
@@ -180,6 +186,13 @@ class TetherElement:
     def Ff(self):
         force = - self.f * self.get_velocity()*np.abs(self.get_velocity())
         return np.vstack((force, np.zeros((1, 1))))
+
+    def f_r(self):
+        kp = 1
+        # Error computing
+        e = self.get_angle() - self.previous.get_angle()
+        torque = kp * e
+        return np.vstack((np.zeros(3, 1), torque))
 
     def Fs(self, h):
         return np.zeros((4, 1))
