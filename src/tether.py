@@ -120,9 +120,9 @@ class Tether:
 
         for e in self.elements:
             if e.next is not None:
-                total_length.append(np.linalg.norm(np.asarray(e.next.position)[:-1] - np.asarray(e.position)[:-1], axis=1))
+                total_length.append(np.linalg.norm(e.next.get_positions() - e.get_positions(), axis=1))
         
-        total_length = np.squeeze(np.asarray(total_length))
+        total_length = np.squeeze(np.asarray(total_length))[:, :-1]
 
         m = np.mean(total_length, axis=0)
         relative_error = 100*(m - self.element_length*np.ones(self.t.shape))/self.element_length*np.ones(self.t.shape)
@@ -146,8 +146,8 @@ class Tether:
 
         for e in self.elements:
             if e.previous is not None and e.next is not None:
-                u_previous = np.squeeze(np.asarray(e.previous.position)[:-1] - np.asarray(e.position)[:-1])
-                u_next = np.squeeze(np.asarray(e.next.position)[:-1] - np.asarray(e.position)[:-1])
+                u_previous = np.squeeze(np.asarray(e.previous.get_positions())[:-1] - np.asarray(e.get_positions())[:-1])
+                u_next = np.squeeze(np.asarray(e.next.get_positions())[:-1] - np.asarray(e.get_positions())[:-1])
                 total_angle.append(np.arccos(np.sum((u_previous*u_next) / (np.linalg.norm(u_previous) * np.linalg.norm(u_next)), axis=1)))
         
         total_angle = np.squeeze(np.asarray(total_angle))
@@ -306,9 +306,9 @@ class Tether:
     def animate(self, i):
         X, Y, Z = [], [], []
         for e in self.elements:
-            X.append(e.position[i][0][0])
-            Y.append(e.position[i][1][0])
-            Z.append(e.position[i][2][0])
+            X.append(e.get_position(i)[0][0])
+            Y.append(e.get_position(i)[1][0])
+            Z.append(e.get_position(i)[2][0])
         self.graph.set_data(np.asarray(X), np.asarray(Y))
         self.graph.set_3d_properties(np.asarray(Z))
         return self.graph,
