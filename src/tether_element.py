@@ -43,8 +43,8 @@ class TetherElement:
         self.kp = 200
         self.kd = 3.5
         self.ki = 3
-        self.previous_length = 0.
-        self.next_length = 0.
+        self.previous_length = self.length
+        self.next_length = self.length
         self.previous_int = 0.
         self.next_int = 0.
 
