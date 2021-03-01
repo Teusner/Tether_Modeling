@@ -89,9 +89,9 @@ class Tether:
 
         for e in self.elements:
             if e.next is not None:
-                total_length.append(np.linalg.norm(np.asarray(e.next.position)[:-1] - np.asarray(e.position)[:-1], axis=1))
+                total_length.append(np.linalg.norm(e.next.get_positions() - e.get_positions(), axis=1))
         
-        total_length = np.squeeze(np.asarray(total_length))
+        total_length = np.squeeze(np.asarray(total_length))[:, :-1]
         ax_length.plot(self.t, total_length.T, color="grey")
 
         m, std = np.mean(total_length, axis=0), np.std(total_length, axis=0)
@@ -145,12 +145,10 @@ class Tether:
         total_angle = []
 
         for e in self.elements:
-            if e.previous is not None and e.next is not None:
-                u_previous = np.squeeze(np.asarray(e.previous.get_positions())[:-1] - np.asarray(e.get_positions())[:-1])
-                u_next = np.squeeze(np.asarray(e.next.get_positions())[:-1] - np.asarray(e.get_positions())[:-1])
-                total_angle.append(np.arccos(np.sum((u_previous*u_next) / (np.linalg.norm(u_previous) * np.linalg.norm(u_next)), axis=1)))
+            if e.next is not None:
+                total_angle.append(e.get_angles())
         
-        total_angle = np.squeeze(np.asarray(total_angle))
+        total_angle = np.squeeze(np.asarray(total_angle))[:, :-1]
 
         ax_angle.plot(self.t, total_angle.T, color="grey")
 
@@ -160,8 +158,6 @@ class Tether:
         ax_angle.plot(self.t, m - 3*std, color="teal", linewidth=2)
         ax_angle.plot(self.t, m + 3*std, color="teal", linewidth=2)
 
-        ax_angle.plot(self.t, np.pi/2*np.ones(self.t.shape), color="orange", label="reference angle", linewidth=2)
-
         # ax_angle.set_title("Angle between links")
         ax_angle.grid()
         ax_angle.set_xlabel(r"Time (in $s$)")
@@ -170,6 +166,37 @@ class Tether:
         ax_angle.legend()
 
         return fig_angle, ax_angle
+
+    def monitor_shape(self):
+        fig_shape, ax_shape = plt.subplots()
+        total_angle = []
+
+        for e in self.elements:
+            if e.previous is not None and e.next is not None:
+                u_previous = np.squeeze(np.asarray(e.previous.get_positions())[:-1] - np.asarray(e.get_positions())[:-1])
+                u_next = np.squeeze(np.asarray(e.next.get_positions())[:-1] - np.asarray(e.get_positions())[:-1])
+                total_angle.append(np.arccos(np.sum((u_previous*u_next) / (np.linalg.norm(u_previous) * np.linalg.norm(u_next)), axis=1)))
+        
+        total_angle = np.squeeze(np.asarray(total_angle))
+
+        ax_shape.plot(self.t, total_angle.T, color="grey")
+
+        m, std = np.mean(total_angle, axis=0), np.std(total_angle, axis=0)
+        ax_shape.fill_between(self.t, m - 3*std, m + 3*std, facecolor='teal', alpha=0.4, label=r"$3.\sigma$ area")
+        ax_shape.plot(self.t, m, color="crimson", linewidth=3, label="mean of lengths")
+        ax_shape.plot(self.t, m - 3*std, color="teal", linewidth=2)
+        ax_shape.plot(self.t, m + 3*std, color="teal", linewidth=2)
+
+        ax_angle.plot(self.t, np.pi/2*np.ones(self.t.shape), color="orange", label="reference angle", linewidth=2)
+
+        # ax_angle.set_title("Angle between links")
+        ax_shape.grid()
+        ax_shape.set_xlabel(r"Time (in $s$)")
+        ax_shape.set_ylabel(r"Angle (in $rad$)")
+        ax_shape.set_xlim(self.t0, self.tf)
+        ax_shape.legend()
+
+        return fig_shape, ax_shape
 
     def monitor_kinetic_energy(self):
         fig_ek, ax_ek = plt.subplots()
@@ -319,6 +346,7 @@ if __name__ == "__main__":
     T.process(0, 30, 1/20)
 
     fig_length_error, ax_length_error = T.monitor_length_error()
+    fig_length, ax_length = T.monitor_angle()
     plt.show()
 
     T.simulate()

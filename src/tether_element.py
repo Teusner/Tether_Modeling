@@ -106,14 +106,14 @@ class TetherElement:
     def get_velocity(self):
         return np.asarray(self.state_history[-1])[4:7]
 
-    # def get_acceleration(self):
-    #     return self.acceleration[-1]
-
     def get_positions(self):
         return np.asarray(self.state_history)[:, :3]
     
     def get_velocities(self):
-        return np.asarray(self.state_history[:, 4:7])
+        return np.asarray(self.state_history)[:, 4:7]
+
+    def get_angles(self):
+        return np.asarray(self.state_history)[:, 3]
 
     def step(self, h):
         # Compute acceleration
