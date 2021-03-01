@@ -304,6 +304,7 @@ class Tether:
         # Attaching 3D axis to the figure 
         self.fig = plt.figure() 
         self.ax = p3.Axes3D(self.fig)
+        self.ax.set_proj_type('ortho')
 
         # Setting up title
         self.fig.suptitle('Tether', fontsize=16)
