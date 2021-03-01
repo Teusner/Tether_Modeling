@@ -139,15 +139,15 @@ class TetherElement:
             u = (self.previous.get_position() - self.get_position()) / lm
 
             # Error computing
-            e = self.length - lm
+            e = (self.length - lm)
             de = (lm - self.previous_length) / h
 
             # Processing force
-            force = - ( self.kp * e + self.kd * de - self.ki * self.previous_int) * u
+            force = - ( self.kp * e + self.kd * de + self.ki * self.previous_int) * u
 
             # Updating values
             self.previous_length = lm
-            self.previous_int += h * (self.length - lm) / lm
+            self.previous_int += h * e
 
             return force
         else :
@@ -155,18 +155,18 @@ class TetherElement:
 
     def Ft_next(self, h):
         if self.next is not None:
-            # Current lenght
+            # Current length
             lm = np.linalg.norm(self.next.get_position() - self.get_position())
 
             # Force support vector
             u = (self.next.get_position() - self.get_position()) / lm
 
             # Error computing
-            e = self.length - lm
+            e = (self.length - lm)
             de = (lm - self.next_length) / h
 
             # Processing force
-            force = - ( self.kp * e + self.kd * de - self.ki * self.next_int) * u
+            force = - ( self.kp * e + self.kd * de + self.ki * self.next_int) * u
 
             # Updating values
             self.next_length = lm
