@@ -15,12 +15,12 @@ class TetherElement:
     g = 9.81
     rho = 1000
 
-    def __init__(self, mass, length, volume, position, config_filename=None):
+    def __init__(self, mass, length, volume, position, is_extremity=False, config_filename=None):
         # UUID and pointer to the neighbors TetherElements
         self.uuid = uuid.uuid4()
         self.previous = None
         self.next = None
-        self.is_extremity = False
+        self.is_extremity = is_extremity
 
         # Physical parameters of the TetherElement
         self.mass = mass

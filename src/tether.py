@@ -51,12 +51,12 @@ class Tether:
             return [eq1, eq2, eq3]
 
         # Initialise positions for each TetherElements
-        self.elements.append(TetherElement(self.element_mass, self.element_length, self.element_volume, self.position_first, self.config_filename))
+        self.elements.append(TetherElement(self.element_mass, self.element_length, self.element_volume, self.position_first, is_extremity=True, config_filename=self.config_filename))
         for i in range(1, self.n-1):
             position = fsolve(g, self.position_first, args=(i)).reshape(3, 1)
             # print(position.flatten())
-            self.elements.append(TetherElement(self.element_mass, self.element_length, self.element_volume, position, self.config_filename))
-        self.elements.append(TetherElement(self.element_mass, self.element_length, self.element_volume, self.position_last, self.config_filename))
+            self.elements.append(TetherElement(self.element_mass, self.element_length, self.element_volume, position, config_filename=self.config_filename))
+        self.elements.append(TetherElement(self.element_mass, self.element_length, self.element_volume, self.position_last, is_extremity=True, config_filename=self.config_filename))
 
         # Chaining elements
         for i in range(1, n-1):
