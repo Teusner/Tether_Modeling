@@ -5,7 +5,6 @@ import yaml
 ### TODO
 # Cleaning the force mask
 # Cleaning config.yaml
-# Adding Tether twist moment along the Tether
 
 class TetherElement:
     # Physical constants of the system

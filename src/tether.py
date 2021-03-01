@@ -320,7 +320,8 @@ class Tether:
         self.ax.view_init(elev=20, azim=-50)
 
         # Creating n line object for each TetherElement
-        self.graph, = self.ax.plot([], [], [], color="teal", marker="o")
+        self.graph, = self.ax.plot([], [], [], color="teal", marker="o", markersize=10)
+        self.orientation, = self.ax.plot([], [], [], linestyle="", marker="o", color="crimson", markersize=2)
 
         # Creating 3D animation
         self.ani = animation.FuncAnimation(self.fig, self.animate, frames=int((self.tf-self.t0)/self.h), interval=self.h*1000, blit=True, repeat=False)
@@ -331,23 +332,26 @@ class Tether:
             self.ani.save(filename, writer=writer)
 
     def animate(self, i):
-        X, Y, Z = [], [], []
+        X, Y, Z, theta = [], [], [], []
         for e in self.elements:
             X.append(e.get_position(i)[0][0])
             Y.append(e.get_position(i)[1][0])
             Z.append(e.get_position(i)[2][0])
+            theta.append(e.get_angle(i)[0])
         self.graph.set_data(np.asarray(X), np.asarray(Y))
         self.graph.set_3d_properties(np.asarray(Z))
-        return self.graph,
+        self.orientation.set_data(np.asarray(X), np.asarray(Y))
+        self.orientation.set_3d_properties(np.asarray(Z))
+        return self.graph, self.orientation,
 
 
 if __name__ == "__main__":
     T = Tether(25, 11, "./config/TetherElement.yaml")
     T.process(0, 30, 1/20)
 
-    fig_length_error, ax_length_error = T.monitor_length_error()
-    fig_length, ax_length = T.monitor_angle()
-    plt.show()
+    # fig_length_error, ax_length_error = T.monitor_length_error()
+    # fig_length, ax_length = T.monitor_angle()
+    # plt.show()
 
     T.simulate()
     plt.show()
