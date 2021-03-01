@@ -25,12 +25,12 @@ class TetherElement:
         self.length = length
         self.volume = volume
 
-        # State vector of the TetherElement [x, y, z, theta, vx, vy, vz, vtheta]
-        self.X = np.zeros((8, 1), dtype=np.float64)
-        self.X[:3] = position
+        # State vector of the TetherElement [x, y, z, theta, vx, vy, vz, vtheta].T
+        X = np.zeros((8, 1), dtype=np.float64)
+        X[:3] = position
 
         # State vector history
-        self.state_history = [self.X]
+        self.state_history = [X]
 
         # Energy list
         self.Ek = [0.]
@@ -121,8 +121,7 @@ class TetherElement:
         else:
             U = np.zeros((4, 1))
 
-        self.X += h * np.vstack((self.X[4:], acceleration + U))
-        self.state_history.append(self.X)
+        self.state_history.append(self.state_history[-1] + h * np.vstack((self.state_history[-1][4:8], acceleration + U)))
             
         self.Ek.append(self.mass/2*(self.get_velocity().T@self.get_velocity())[0,0])
         self.Ep.append(self.Ep[-1] + self.dW(h))
