@@ -2,17 +2,13 @@ import matplotlib
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d.axes3d as p3
 import matplotlib.animation as animation
-
-from scipy.optimize import fsolve
-
 import numpy as np
 import time
-
 import yaml
 
 from tether_element import TetherElement
-
 from initialization import get_catenary_coefficients, get_initial_position
+
 
 ### TODO
 # Fixing n / L / number of TetherElement per meters
