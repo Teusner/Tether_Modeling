@@ -20,12 +20,11 @@ from tether_element import TetherElement
 
 class Tether:
     def __init__(self, Tether_config_filename, TetherElement_config_filename):
-        # Tether config files
-        self.Tether_config_filename = Tether_config_filename
-        self.TetherElement_config_filename = TetherElement_config_filename
-
         # Parsing configuration file
-        self.parse()
+        self.parse(Tether_config_filename)
+
+        # TetherElement config files
+        self.TetherElement_config_filename = TetherElement_config_filename
 
         # List of TetherElements
         self.elements = []
@@ -50,12 +49,12 @@ class Tether:
             return [eq1, eq2, eq3]
 
         # Initialise positions for each TetherElements
-        self.elements.append(TetherElement(self.element_mass, self.element_length, self.element_volume, self.position_first, is_extremity=True, config_filename=self.TetherElement_config_filename))
+        self.elements.append(TetherElement(self.element_mass, self.element_length, self.element_volume, self.position_first,self.TetherElement_config_filename,  is_extremity=True))
         for i in range(1, self.n-1):
             position = fsolve(g, self.position_first, args=(i)).reshape(3, 1)
             # print(position.flatten())
-            self.elements.append(TetherElement(self.element_mass, self.element_length, self.element_volume, position, config_filename=self.TetherElement_config_filename))
-        self.elements.append(TetherElement(self.element_mass, self.element_length, self.element_volume, self.position_last, is_extremity=True, config_filename=self.TetherElement_config_filename))
+            self.elements.append(TetherElement(self.element_mass, self.element_length, self.element_volume, position, self.TetherElement_config_filename))
+        self.elements.append(TetherElement(self.element_mass, self.element_length, self.element_volume, self.position_last, self.TetherElement_config_filename, is_extremity=True))
 
         # Chaining elements
         for i in range(1, self.n-1):
@@ -71,8 +70,8 @@ class Tether:
             res += str(e)
         return res
 
-    def parse(self):
-        with open(self.Tether_config_filename) as f:
+    def parse(self, config_filename):
+        with open(config_filename) as f:
             parameters = yaml.load(f)
 
             # Tether parameters parsing
