@@ -1,0 +1,13 @@
+# Tether configuration file
+
+# Tether parameters
+Tether:
+    length: 25
+    n: 10
+    linear_mass: 10
+    linear_volume: 1
+
+# Environment parameters
+Environment:
+    rho: 1000
+    g: 9.81

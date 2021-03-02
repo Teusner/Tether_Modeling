@@ -12,7 +12,7 @@ from tether_element import TetherElement
 
 ### TODO
 # Fixing n / L / number of TetherElement per meters
-# Adding extermities forces to see forces which are going to be applied to the MMO
+# Adding extermities forces monitoring to see forces which are going to be applied to the MMO
 # Enhance visual representation
 # Using double linked list and exec {for i in range(10): exec("obj{} = Stock(name, price)".format(i))} to instantiate TetherElements
 
@@ -51,12 +51,12 @@ class Tether:
             return [eq1, eq2, eq3]
 
         # Initialise positions for each TetherElements
-        self.elements.append(TetherElement(self.element_mass, self.element_length, self.element_volume, self.position_first, self.config_filename))
+        self.elements.append(TetherElement(self.element_mass, self.element_length, self.element_volume, self.position_first, is_extremity=True, config_filename=self.config_filename))
         for i in range(1, self.n-1):
             position = fsolve(g, self.position_first, args=(i)).reshape(3, 1)
             # print(position.flatten())
-            self.elements.append(TetherElement(self.element_mass, self.element_length, self.element_volume, position, self.config_filename))
-        self.elements.append(TetherElement(self.element_mass, self.element_length, self.element_volume, self.position_last, self.config_filename))
+            self.elements.append(TetherElement(self.element_mass, self.element_length, self.element_volume, position, config_filename=self.config_filename))
+        self.elements.append(TetherElement(self.element_mass, self.element_length, self.element_volume, self.position_last, is_extremity=True, config_filename=self.config_filename))
 
         # Chaining elements
         for i in range(1, n-1):
@@ -89,9 +89,9 @@ class Tether:
 
         for e in self.elements:
             if e.next is not None:
-                total_length.append(np.linalg.norm(np.asarray(e.next.position)[:-1] - np.asarray(e.position)[:-1], axis=1))
+                total_length.append(np.linalg.norm(e.next.get_positions() - e.get_positions(), axis=1))
         
-        total_length = np.squeeze(np.asarray(total_length))
+        total_length = np.squeeze(np.asarray(total_length))[:, :-1]
         ax_length.plot(self.t, total_length.T, color="grey")
 
         m, std = np.mean(total_length, axis=0), np.std(total_length, axis=0)
@@ -120,9 +120,9 @@ class Tether:
 
         for e in self.elements:
             if e.next is not None:
-                total_length.append(np.linalg.norm(np.asarray(e.next.position)[:-1] - np.asarray(e.position)[:-1], axis=1))
+                total_length.append(np.linalg.norm(e.next.get_positions() - e.get_positions(), axis=1))
         
-        total_length = np.squeeze(np.asarray(total_length))
+        total_length = np.squeeze(np.asarray(total_length))[:, :-1]
 
         m = np.mean(total_length, axis=0)
         relative_error = 100*(m - self.element_length*np.ones(self.t.shape))/self.element_length*np.ones(self.t.shape)
@@ -145,12 +145,10 @@ class Tether:
         total_angle = []
 
         for e in self.elements:
-            if e.previous is not None and e.next is not None:
-                u_previous = np.squeeze(np.asarray(e.previous.position)[:-1] - np.asarray(e.position)[:-1])
-                u_next = np.squeeze(np.asarray(e.next.position)[:-1] - np.asarray(e.position)[:-1])
-                total_angle.append(np.arccos(np.sum((u_previous*u_next) / (np.linalg.norm(u_previous) * np.linalg.norm(u_next)), axis=1)))
+            if e.next is not None:
+                total_angle.append(e.get_angles())
         
-        total_angle = np.squeeze(np.asarray(total_angle))
+        total_angle = np.squeeze(np.asarray(total_angle))[:, :-1]
 
         ax_angle.plot(self.t, total_angle.T, color="grey")
 
@@ -160,8 +158,6 @@ class Tether:
         ax_angle.plot(self.t, m - 3*std, color="teal", linewidth=2)
         ax_angle.plot(self.t, m + 3*std, color="teal", linewidth=2)
 
-        ax_angle.plot(self.t, np.pi/2*np.ones(self.t.shape), color="orange", label="reference angle", linewidth=2)
-
         # ax_angle.set_title("Angle between links")
         ax_angle.grid()
         ax_angle.set_xlabel(r"Time (in $s$)")
@@ -170,6 +166,37 @@ class Tether:
         ax_angle.legend()
 
         return fig_angle, ax_angle
+
+    def monitor_shape(self):
+        fig_shape, ax_shape = plt.subplots()
+        total_angle = []
+
+        for e in self.elements:
+            if e.previous is not None and e.next is not None:
+                u_previous = np.squeeze(np.asarray(e.previous.get_positions())[:-1] - np.asarray(e.get_positions())[:-1])
+                u_next = np.squeeze(np.asarray(e.next.get_positions())[:-1] - np.asarray(e.get_positions())[:-1])
+                total_angle.append(np.arccos(np.sum((u_previous*u_next) / (np.linalg.norm(u_previous) * np.linalg.norm(u_next)), axis=1)))
+        
+        total_angle = np.squeeze(np.asarray(total_angle))
+
+        ax_shape.plot(self.t, total_angle.T, color="grey")
+
+        m, std = np.mean(total_angle, axis=0), np.std(total_angle, axis=0)
+        ax_shape.fill_between(self.t, m - 3*std, m + 3*std, facecolor='teal', alpha=0.4, label=r"$3.\sigma$ area")
+        ax_shape.plot(self.t, m, color="crimson", linewidth=3, label="mean of lengths")
+        ax_shape.plot(self.t, m - 3*std, color="teal", linewidth=2)
+        ax_shape.plot(self.t, m + 3*std, color="teal", linewidth=2)
+
+        ax_shape.plot(self.t, np.pi/2*np.ones(self.t.shape), color="orange", label="reference angle", linewidth=2)
+
+        # ax_angle.set_title("Angle between links")
+        ax_shape.grid()
+        ax_shape.set_xlabel(r"Time (in $s$)")
+        ax_shape.set_ylabel(r"Angle (in $rad$)")
+        ax_shape.set_xlim(self.t0, self.tf)
+        ax_shape.legend()
+
+        return fig_shape, ax_shape
 
     def monitor_kinetic_energy(self):
         fig_ek, ax_ek = plt.subplots()
@@ -277,6 +304,7 @@ class Tether:
         # Attaching 3D axis to the figure 
         self.fig = plt.figure() 
         self.ax = p3.Axes3D(self.fig)
+        self.ax.set_proj_type('ortho')
 
         # Setting up title
         self.fig.suptitle('Tether', fontsize=16)
@@ -293,7 +321,7 @@ class Tether:
         self.ax.view_init(elev=20, azim=-50)
 
         # Creating n line object for each TetherElement
-        self.graph, = self.ax.plot([], [], [], color="teal", marker="o")
+        self.graph, = self.ax.plot([], [], [], color="teal", marker="o", markersize=10)
 
         # Creating 3D animation
         self.ani = animation.FuncAnimation(self.fig, self.animate, frames=int((self.tf-self.t0)/self.h), interval=self.h*1000, blit=True, repeat=False)
@@ -304,11 +332,12 @@ class Tether:
             self.ani.save(filename, writer=writer)
 
     def animate(self, i):
-        X, Y, Z = [], [], []
+        X, Y, Z, theta = [], [], [], []
         for e in self.elements:
-            X.append(e.position[i][0][0])
-            Y.append(e.position[i][1][0])
-            Z.append(e.position[i][2][0])
+            X.append(e.get_position(i)[0][0])
+            Y.append(e.get_position(i)[1][0])
+            Z.append(e.get_position(i)[2][0])
+            theta.append(e.get_angle(i)[0])
         self.graph.set_data(np.asarray(X), np.asarray(Y))
         self.graph.set_3d_properties(np.asarray(Z))
         return self.graph,
@@ -318,8 +347,9 @@ if __name__ == "__main__":
     T = Tether(25, 11, "./config/TetherElement.yaml")
     T.process(0, 30, 1/20)
 
-    fig_length_error, ax_length_error = T.monitor_length_error()
-    plt.show()
+    # fig_length_error, ax_length_error = T.monitor_length_error()
+    # fig_length, ax_length = T.monitor_angle()
+    # plt.show()
 
     T.simulate()
     plt.show()
