@@ -1,10 +1,19 @@
-This section will present the results of the simulation. To set the different coefficients of the simulation, we will need to build some tools to evaluate the performance of such a model~\cite{ellis_modeling_nodate}.
+This section will present the results of the simulation. We then have the necessary tools to simulate the behavior of a tether. The \textsc{Figure}~\ref{fig:simulation} shows the results of a tether simulation with a length $L = 25m$ with $11$ TetherELements. Each node has a mass $m=10\ kg$, and a volume $v=1.10^{-3}\ m^3$. The coefficients have been set to $K_p=350$, $K_d=5.0$ and $K_i=35.0$. To set these coefficients we need to build some tools to analyze the behavior of the tether to validate the modeling of the system.
+
+\begin{figure}[!htb]
+    \centering
+    \resizebox{0.5\textwidth}{!}{\input{./plots/simulation.pgf}}
+    \caption{Tether simulation}
+    \label{fig:simulation}
+\end{figure}
+
+The different tools that will be presented in the rest of this section will allow analyzing the simulation launched with the previous parameters.
 
 \subsection{Length of different links}
 
-It is useful to trace the length of the links over time in order to verify that the Tether's behavioral model is correct.
+Monitoring the length of each link is important to verify the good performance of the simulation. The plot of these lengths will validate the behavioral force presented in this paper.
 
-The \textsc{Figure}~\ref{fig:length} shows in gray the plot of the length of each link for a simulation containing 15 nodes. In crimson is plotted the average of these lengths and in yellow the target length. Finally, the blue area shows the 95 \% confidence interval.
+The \textsc{Figure}~\ref{fig:length} shows in gray the plot of the length of each link. In crimson is plotted the average of these lengths and in yellow the target length. Finally, the blue area shows the 95~\% confidence interval.
 
 \begin{figure}[!htb]
     \centering
@@ -13,14 +22,15 @@ The \textsc{Figure}~\ref{fig:length} shows in gray the plot of the length of eac
     \label{fig:length}
 \end{figure}
 
-As we can see, after setting the coefficients we are able to have a coherent behavior a few seconds after initialization. On average the link lengths converge towards the set length and the standard deviation is not too high. However, there are still some oscillations and not all links are exactly at the target length due to the wheight perturbations.
+As we can see, we can have a coherent behavior a few seconds after initialization. On average the link lengths converge towards the set length and the standard deviation is not too high. However, there are still some oscillations and not all links are exactly at the target length due to the weight and buoyancy perturbations.
 
 \subsection{Relative error}
-The relative error is also very interesting because it makes it possible to be truly aware of the error but also let us easily tune behavioral model's coefficients.
+
+Another way to interpret the link length error is to plot the error relative to the target length. This makes it possible to check the behavior of the system with tuned coefficients of the implemented behavioral model.
 
 The \textsc{Figure}~\ref{fig:error_length} shows us the average relative length error of the different links compared to the target length.
 
-The adjustment of the coefficients of the behavioral model is done as follows. First the $K_p$ is set to obtain an oscillating system with a bounded average link length. Then we add a derivative effect to remove oscillations on the system by increasing the coefficient $K_d$. Finally we add an integrator effect to remove a static error in order to make the length of the links reach the target length despite the presence of disturbances.
+The adjustment of the coefficients of the behavioral model is done as follows. First, the $K_p$ is set to obtain an oscillating system with a bounded average link length. Then we add a derivative effect to reduce oscillations on the system by increasing the coefficient $K_d$. Finally, we add an integrator effect to remove a static error to make the length of the links reach the target length despite the presence of disturbances.
 
 \begin{figure}[!htb]
     \centering
@@ -31,9 +41,9 @@ The adjustment of the coefficients of the behavioral model is done as follows. F
 
 \subsection{Energetical approach}
 
-Finally, the energy approach is the most important to validate the simulation, because it determines whether the simulation makes physical sense. The system must not have a divergent energy, which would be a physical counter-sense, but here, as there is no energy source, the overall energy must decrease over time, as soon as there is some fluid friction due to the drag force.
+Finally, the energy approach is the most important to validate the simulation, because it determines whether the simulation makes physical sense. The system must not have divergent energy, which would be a physical counter-sense, but here, as there is no energy source, the overall energy must decrease over time, as soon as there is some fluid friction due to the drag force.
 
-The mechanical energy of the system decomposes into the sum of two energies: kinetic energy and potential energy~\cite{viegas_kinetic_2004}.
+The mechanical energy of the system decomposes into the sum of two energies: kinetic energy and potential energy~\cite{viegas2004kinetic}.
 
 \begin{itemize}
     \item \textbf{Kinetic Energy} : The global kinetic energy of the Tether is calculated simply by summing the kinetic energies of the different TetherElements.
@@ -49,17 +59,17 @@ The mechanical energy of the system decomposes into the sum of two energies: kin
         \label{fig:kinetic_energy}
     \end{figure}
 
-    The \textsc{Figure}~\ref{fig:kinetic_energy} presents the evolution of the kinetic energy of the system, with in gray the kinetic energy of each node, in crimson the average of the kinetic energies and the blue area represents the 95\% confidence interval. We can see that the kinetic energy decreases and cancels rapidly. This is explained by the fact that the Tether after a few seconds is correctly initialized and the nodes come to a standstill.
+    The \textsc{Figure}~\ref{fig:kinetic_energy} presents the evolution of the kinetic energy of the system, within gray the kinetic energy of each node, in crimson the average of the kinetic energies, and the blue area represents the 95~\% confidence interval. We can see that the kinetic energy decreases and cancels rapidly. This is explained by the fact that the Tether after a few seconds is correctly initialized and the nodes come to a standstill.
 
-    \item \textbf{Potential Energy} : To calculate the potential energy related to the application of a force on a solid, it is necessary to use the definition of potential energy~\cite{viegas_kinetic_2004}. Indeed we know that by noting $dt$ the time step of the simulation :
+    \item \textbf{Potential Energy} : To calculate the potential energy related to the application of a force on a solid, it is necessary to use the definition of potential energy~\cite{viegas2004kinetic}. Indeed we know that by noting $dt$ the time step of the simulation :
 
     $$\delta W(\overrightarrow{F}) = \overrightarrow{F} \cdot \overrightarrow{dOM} = \overrightarrow{F} \cdot \overrightarrow{v} \cdot dt$$
     
     $$E_p = \int_0^t \sum_{F_{ext}} \delta W(\overrightarrow{F_{ext}}) + cste$$
     
-    Thus we are able to calculate the potential energy by calculating the sum of the elementary work of each force on the system, i.e. the forces that apply to each node, and then by integrating this quantity over time. We then have an expression of the potential energy of the system over time for the Tether which is defined to within a constant, which is set to $0$ in our case.
+    Thus we can calculate the potential energy by calculating the sum of the elementary work of each force on the system, i.e. the forces that apply to each node, and then by integrating this quantity over time. We then have an expression of the potential energy of the system over time for the Tether which is defined to within a constant, which is set to $0$ in our case.
     
-    The \textsc{Figure}~\ref{fig:potential_energy} shows us the evolution of potential energy over time. In gray is plotted the potential energy of each node, in crimson is the average potential energy and the blue area represents the 95 \% confidence interval. We see that the potential energy of the system does not diverge, and that the system tends to position itself in a minimum of potential energy.
+    The \textsc{Figure}~\ref{fig:potential_energy} shows us the evolution of potential energy over time. In gray is plotted the potential energy of each node, in crimson is the average potential energy and the blue area represents the 95~\% confidence interval. We see that the potential energy of the system does not diverge and that the system tends to position itself in a minimum of potential energy.
     
     \begin{figure}[!htb]
         \centering
@@ -68,9 +78,9 @@ The mechanical energy of the system decomposes into the sum of two energies: kin
         \label{fig:potential_energy}
     \end{figure}
 
-    \item \textbf{Mechanical Energy} : Finally, by summing the kinetic and potential energies previously calculated, we are able to get the mechanical energy of the system~\cite{viegas_kinetic_2004}. This will give us information about the non-conservative forces that are included in this system. Indeed, the drag force will cause the system to lose energy since this energy will not be transformed into another form that can be used by the system, but will be dissipated as heat.
+    \item \textbf{Mechanical Energy} : Finally, by summing the kinetic and potential energies previously calculated, we are able to get the mechanical energy of the system~\cite{viegas2004kinetic}. This will give us information about the non-conservative forces that are included in this system. Indeed, the drag force will cause the system to lose energy since this energy will not be transformed into another form that can be used by the system, but will be dissipated as heat.
 
-    The \textsc{Figure}~\ref{fig:energy} shows us the evolution of the mechanical energy over time. In gray is plotted the mechanical energy of each node, in crimson is the average mechanical energy and the blue area represents the 95 \% confidence interval.
+    The \textsc{Figure}~\ref{fig:energy} shows us the evolution of the mechanical energy over time. In gray is plotted the mechanical energy of each node, in crimson is the average mechanical energy and the blue area represents the 95~\% confidence interval.
     
     \begin{figure}[!htb]
         \centering

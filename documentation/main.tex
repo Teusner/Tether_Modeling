@@ -2,10 +2,15 @@
 
 % Usefull packages
 \usepackage{cite}
+\usepackage{caption}
 \usepackage{amsmath}
+\usepackage[usenames, dvipsnames]{xcolor}
 \usepackage{tikz}
+\usetikzlibrary{calc}
 \usepackage{pgf}
 \usepackage[simplified]{pgf-umlcd}
+
+\usepackage[utf8]{inputenc}\DeclareUnicodeCharacter{2212}{-}
 
 \usepackage[pdftex, bookmarks=true, bookmarksnumbered=true,
 pdfpagemode={UseOutlines}, plainpages=false, pdfpagelabels=true,
@@ -20,7 +25,7 @@ pdfkeywords={Tether, Modeling, Simulation, Remotely Operated Underwater Vehicles
 
 \begin{document}
 
-	\title{Rigid Tether Modeling for Underwater Environment Simulation}
+	\title{Flexible Tether Modeling for Underwater Environment Simulation}
 	\author{Quentin~Brateau, ENSTA Bretagne, Brest, France, quentin.brateau@ensta-bretagne.org}
 	\markboth{ENSTA Bretagne - Forssea-Robotics, 2020-2021}{Rigid Tether Modeling for Underwater Environment Simulation}
 
@@ -62,6 +67,7 @@ pdfkeywords={Tether, Modeling, Simulation, Remotely Operated Underwater Vehicles
 
 	% Bibliography
 	\bibliographystyle{IEEEtran}
-	\bibliography{tether}
+	% \bibliography{tether}
+	\bibliography{references}
 
 \end{document}

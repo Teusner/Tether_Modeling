@@ -3,30 +3,32 @@ import uuid
 import yaml
 
 ### TODO
-# Add cleaned up behavioral model
 # Cleaning the force mask
-# Cleaning the acceleration processing part
+# Cleaning config.yaml
 
 class TetherElement:
     # Physical constants of the system
     g = 9.81
     rho = 1000
 
-    def __init__(self, mass, length, volume, position, config_filename=None):
+    def __init__(self, mass, length, volume, position, is_extremity=False, config_filename=None):
         # UUID and pointer to the neighbors TetherElements
         self.uuid = uuid.uuid4()
         self.previous = None
         self.next = None
+        self.is_extremity = is_extremity
 
         # Physical parameters of the TetherElement
         self.mass = mass
         self.length = length
         self.volume = volume
 
-        # Mechanical parameters of the TetherElement
-        self.position = [position]
-        self.velocity = [np.zeros((3, 1), dtype=np.float64)]
-        self.acceleration = [np.array((3, 1), dtype=np.float64)]
+        # State vector of the TetherElement [x, y, z, theta, vx, vy, vz, vtheta].T
+        X = np.zeros((8, 1), dtype=np.float64)
+        X[:3] = position
+
+        # State vector history
+        self.state_history = [X]
 
         # Energy list
         self.Ek = [0.]
@@ -37,17 +39,9 @@ class TetherElement:
         self.acceleration_limit = 1e4
 
         # Coefficient for the behavioral model
-        self.kp = 200
-        self.kd = 3.5
-        self.ki = 3
-        self.previous_length = 0.
-        self.next_length = 0.
-        self.previous_int = 0.
-        self.next_int = 0.
-
-        # Integrator for force
-        self.E_previous = 0.
-        self.E_next = 0.
+        self.Kp, self.Kd, self.Ki = 0., 0., 0.
+        self.previous_length, self.next_length = self.length, self.length
+        self.E_previous, self.E_next = 0., 0.
 
         # Integrator for torque
         self.E_torque = 0.
@@ -95,82 +89,131 @@ class TetherElement:
             # Drag coefficient
             self.f = parameters["Drag"]["f"]
 
-    def get_position(self):
-        return self.position[-1]
+    def get_position(self, i=None):
+        if i is not None:
+            return np.asarray(self.state_history[i])[:3]
+        else:
+            return np.asarray(self.state_history[-1])[:3]
+
+    def get_angle(self, i=None):
+        if i is not None:
+            return np.asarray(self.state_history[i])[3]
+        else:
+            return np.asarray(self.state_history[-1])[33]
 
     def get_velocity(self):
-        return self.velocity[-1]
+        return np.asarray(self.state_history[-1])[4:7]
 
-    def get_acceleration(self):
-        return self.acceleration[-1]
+    def get_positions(self):
+        return np.asarray(self.state_history)[:, :3]
+    
+    def get_velocities(self):
+        return np.asarray(self.state_history)[:, 4:7]
+
+    def get_angles(self):
+        return np.asarray(self.state_history)[:, 3]
 
     def step(self, h):
         # Compute acceleration
         forces = np.hstack((self.Fg(), self.Fb(), self.Ft_prev(h),  self.Ft_next(h), self.Ff(), self.Fs(h)))
-        self.acceleration.append(np.clip(1 / self.mass * ((forces[:, self.forces_mask]) @ np.ones((6, 1))), -self.acceleration_limit, self.acceleration_limit))
-        
-        if self.previous is not None and self.next is not None:
-            self.velocity.append(self.get_velocity() + h * self.get_acceleration())
-            self.position.append(self.get_position() + h * self.get_velocity())
+        forces = np.sum(forces[:, self.forces_mask], axis=1).reshape(4, 1)
+        acceleration = np.clip(forces / self.mass, -self.acceleration_limit, self.acceleration_limit)
+
+        if self.is_extremity:
+            U = -acceleration
+            U[3, 0] = 0
         else:
-            self.velocity.append(self.get_velocity())
-            self.position.append(self.get_position())
+            U = np.zeros((4, 1))
+
+        self.state_history.append(self.state_history[-1] + h * np.vstack((self.state_history[-1][4:8], acceleration + U)))
             
         self.Ek.append(self.mass/2*(self.get_velocity().T@self.get_velocity())[0,0])
         self.Ep.append(self.Ep[-1] + self.dW(h))
 
     def Fg(self):
-        return np.array([[0], [0], [-self.mass * self.g]])
+        return np.array([[0], [0], [-self.mass * self.g], [0]])
 
     def Fb(self) :
-        return np.array([[0], [0], [self.rho * self.volume * self.g]])
+        return np.array([[0], [0], [self.rho * self.volume * self.g], [0]])
 
     def Ft_prev(self, h):
         if self.previous is not None:
+            # Current lenght
             lm = np.linalg.norm(self.get_position() - self.previous.get_position())
+
+            # Force support vector
             u = (self.previous.get_position() - self.get_position()) / lm
-            force = - ( self.kp * (self.length - lm) / self.length + self.kd * (lm - self.previous_length) / h - self.ki * self.previous_int) * u
+
+            # Error computing
+            e = (self.length - lm)
+            de = (lm - self.previous_length) / h
+
+            # Processing force
+            force = - ( self.kp * e + self.kd * de + self.ki * self.E_previous) * u
+
+            # Updating values
             self.previous_length = lm
-            self.previous_int += h * (self.length - lm) / lm
-            return force
+            self.E_previous += h * e
+
+            return np.vstack((force, np.zeros((1, 1))))
         else :
-            return np.zeros((3, 1))
+            return np.zeros((4, 1))
 
     def Ft_next(self, h):
         if self.next is not None:
+            # Current length
             lm = np.linalg.norm(self.next.get_position() - self.get_position())
+
+            # Force support vector
             u = (self.next.get_position() - self.get_position()) / lm
-            force = - ( self.kp * (self.length - lm) / self.length + self.kd * (lm - self.next_length) / h - self.ki * self.next_int) * u
+
+            # Error computing
+            e = (self.length - lm)
+            de = (lm - self.next_length) / h
+
+            # Processing force
+            force = - ( self.kp * e + self.kd * de + self.ki * self.E_next) * u
+
+            # Updating values
             self.next_length = lm
-            self.next_int += h * (self.length - lm) / lm
-            return force
+            self.E_next += h * e
+            return np.vstack((force, np.zeros((1, 1))))
         else :
-            return np.zeros((3, 1))
+            return np.zeros((4, 1))
 
     def Ff(self):
-        return - self.f * self.get_velocity()*np.abs(self.get_velocity())
+        force = - self.f * self.get_velocity()*np.abs(self.get_velocity())
+        return np.vstack((force, np.zeros((1, 1))))
+
+    def f_r(self):
+        kp = 1
+        # Error computing
+        e = self.get_angle() - self.previous.get_angle()
+        torque = kp * e
+        return np.vstack((np.zeros(3, 1), torque))
 
     def Fs(self, h):
-        if self.next is None or self.previous is None:
-            return np.zeros((3, 1))
+        return np.zeros((4, 1))
+        # if self.next is None or self.previous is None:
+        #     return np.zeros((3, 1))
         
-        u_previous = (self.previous.get_position() - self.get_position())
-        u_next = (self.next.get_position() - self.get_position())
+        # u_previous = (self.previous.get_position() - self.get_position())
+        # u_next = (self.next.get_position() - self.get_position())
 
-        value = np.clip((u_next.T @ u_previous) / (np.linalg.norm(self.previous.get_position() - self.get_position()) * np.linalg.norm((self.next.get_position() - self.get_position()))), -1.0, 1.0)
-        e = (np.arccos(value) - np.pi/2) / (np.pi / 2)
-        value = np.clip((u_next + h*(self.next.get_velocity() - self.get_velocity())).T @ (u_previous+h*(self.previous.get_velocity() - self.get_velocity())), -1.0, 1.0)
-        de = (np.arccos(value) - e) / h
-        self.E_torque += h*e
+        # value = np.clip((u_next.T @ u_previous) / (np.linalg.norm(self.previous.get_position() - self.get_position()) * np.linalg.norm((self.next.get_position() - self.get_position()))), -1.0, 1.0)
+        # e = (np.arccos(value) - np.pi/2) / (np.pi / 2)
+        # value = np.clip((u_next + h*(self.next.get_velocity() - self.get_velocity())).T @ (u_previous+h*(self.previous.get_velocity() - self.get_velocity())), -1.0, 1.0)
+        # de = (np.arccos(value) - e) / h
+        # self.E_torque += h*e
 
-        if np.allclose((u_previous + u_next), np.zeros((3, 1))):
-            return np.zeros((3, 1))
-        else:
-            self.v = (u_previous + u_next) / np.linalg.norm(u_previous + u_next)
-            return (self.Tp*e + self.Td*de + self.Ti*self.E_torque) * self.v
+        # if np.allclose((u_previous + u_next), np.zeros((3, 1))):
+        #     return np.zeros((3, 1))
+        # else:
+        #     self.v = (u_previous + u_next) / np.linalg.norm(u_previous + u_next)
+        #     return - (self.Tp*e + self.Td*de + self.Ti*self.E_torque) * self.v
 
     def dW(self, h):
-        W = self.velocity[-1].T @ np.hstack((self.Fg(), self.Fb(), self.Ft_prev(h), self.Ft_next(h), self.Ff(), self.Fs(h)))
+        W = self.get_velocity().T @ np.hstack((self.Fg(), self.Fb(), self.Ft_prev(h), self.Ft_next(h), self.Ff(), self.Fs(h)))[:3]
         return np.sum(h * W)
 
 
