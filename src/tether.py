@@ -2,15 +2,13 @@ import matplotlib
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d.axes3d as p3
 import matplotlib.animation as animation
-
-from scipy.optimize import fsolve
-
 import numpy as np
 import time
-
 import yaml
 
 from tether_element import TetherElement
+from initialization import get_catenary_coefficients, get_initial_position
+
 
 ### TODO
 # Fixing n / L / number of TetherElement per meters
@@ -29,28 +27,12 @@ class Tether:
         # List of TetherElements
         self.elements = []
 
-        # Extremities
-        self.position_first = np.array([[10.], [0], [0.]])
-        self.position_last = np.array([[18.], [0], [3.]])
-
-        def f(p):
-            eq1 = p[0]*np.sinh((self.position_last[0, 0]+p[1])/p[0]) - p[0]*np.sinh((self.position_first[0, 0]+p[1])/p[0]) - self.length
-            eq2 = p[0]*np.cosh((self.position_first[0, 0]+p[1])/p[0]) + p[2] - self.position_first[1, 0]
-            eq3 = p[0]*np.cosh((self.position_last[0, 0]+p[1])/p[0]) + p[2] - self.position_last[1, 0]
-            return [eq1, eq2, eq3]
-
-        initial_parameters = fsolve(f, (1., (self.position_first[0, 0]+self.position_last[0, 0])/2, (self.position_first[1, 0]+self.position_last[1, 0])/2))
-
-        def g(p, i):
-            eq1 = initial_parameters[0]*np.sinh((p[0]+initial_parameters[1])/initial_parameters[0]) - initial_parameters[0]*np.sinh((self.position_first[0, 0]+initial_parameters[1])/initial_parameters[0]) - i * self.length / (self.n)
-            eq2 = initial_parameters[0]*np.cosh((p[0]+initial_parameters[1])/initial_parameters[0]) + initial_parameters[2] - p[2]
-            eq3 = self.position_first[1, 0] + i * (self.position_last[1, 0] - self.position_first[1, 0]) / (self.n-1) - p[1]
-            return [eq1, eq2, eq3]
+        initial_parameters = get_catenary_coefficients(self.position_first, self.position_last, self.length)        
 
         # Initialise positions for each TetherElements
         self.elements.append(TetherElement(self.element_mass, self.element_length, self.element_volume, self.position_first,self.TetherElement_config_filename,  is_extremity=True))
         for i in range(1, self.n-1):
-            position = fsolve(g, self.position_first, args=(i)).reshape(3, 1)
+            position = get_initial_position(self.position_first, self.position_last, self.length, self.n, i, initial_parameters)
             # print(position.flatten())
             self.elements.append(TetherElement(self.element_mass, self.element_length, self.element_volume, position, self.TetherElement_config_filename))
         self.elements.append(TetherElement(self.element_mass, self.element_length, self.element_volume, self.position_last, self.TetherElement_config_filename, is_extremity=True))
