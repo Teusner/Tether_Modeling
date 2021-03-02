@@ -11,7 +11,7 @@ class TetherElement:
     g = 9.81
     rho = 1000
 
-    def __init__(self, mass, length, volume, position, is_extremity=False, config_filename=None):
+    def __init__(self, mass, length, volume, position, TetherElement_config_filename, is_extremity=False):
         # UUID and pointer to the neighbors TetherElements
         self.uuid = uuid.uuid4()
         self.previous = None
@@ -53,8 +53,7 @@ class TetherElement:
         self.Tp = 50.
 
         # Loading_parameters
-        if config_filename is not None:
-            self.load_parameters(config_filename)
+        self.parse(TetherElement_config_filename)
 
     def __str__(self):
         res = "TetherElement : {} \n".format(self.uuid)
@@ -67,21 +66,16 @@ class TetherElement:
         res += "\t Next \t : {} \n".format(next_uuid)
         return res
     
-    def load_parameters(self, filename):
-        with open(filename) as f:
+    def parse(self, config_filename):
+        with open(config_filename) as f:
             parameters = yaml.load(f)
 
-            # TetherElement parameters
-            self.mass = parameters["TetherElement"]["mass"]
-            self.length = parameters["TetherElement"]["length"]
-            self.volume = parameters["TetherElement"]["volume"]
-
-            # Force
+            # Force coefficients
             self.kp = parameters["Length"]["Kp"]
             self.kd = parameters["Length"]["Kd"]
             self.ki = parameters["Length"]["Ki"]
 
-            # Force
+            # Torque coefficients
             self.Tp = parameters["Torque"]["Kp"]
             self.Td = parameters["Torque"]["Kd"]
             self.Ti = parameters["Torque"]["Ki"]
@@ -218,12 +212,4 @@ class TetherElement:
 
 
 if __name__ == "__main__":
-    t1 = TetherElement(1, 1, 1, np.array([[0], [0], [1]]))
-    t2 = TetherElement(1, 1, 1, np.array([[0], [0], [1]]))
-    t1.next = t2
-    t2.previous = t1
-    print(t1)
-    print(t2)
-
-    t1.load_parameters("./config/TetherElement.yaml")
-    print(t2.kp, t2.kd, t2.ki)
+    pass
