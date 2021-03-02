@@ -322,7 +322,6 @@ class Tether:
 
         # Creating n line object for each TetherElement
         self.graph, = self.ax.plot([], [], [], color="teal", marker="o", markersize=10)
-        self.orientation, = self.ax.plot([], [], [], linestyle="", marker="o", color="crimson", markersize=2)
 
         # Creating 3D animation
         self.ani = animation.FuncAnimation(self.fig, self.animate, frames=int((self.tf-self.t0)/self.h), interval=self.h*1000, blit=True, repeat=False)
@@ -341,9 +340,7 @@ class Tether:
             theta.append(e.get_angle(i)[0])
         self.graph.set_data(np.asarray(X), np.asarray(Y))
         self.graph.set_3d_properties(np.asarray(Z))
-        self.orientation.set_data(np.asarray(X), np.asarray(Y))
-        self.orientation.set_3d_properties(np.asarray(Z))
-        return self.graph, self.orientation,
+        return self.graph,
 
 
 if __name__ == "__main__":
