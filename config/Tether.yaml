@@ -3,7 +3,7 @@
 # Tether parameters
 Tether:
     length: 25
-    n: 10
+    n: 11
     linear_mass: 10
     linear_volume: 1
 
@@ -11,3 +11,13 @@ Tether:
 Environment:
     rho: 1000
     g: 9.81
+
+Elements:
+    position_first_element:
+        x: 10.0
+        y: 0.0
+        z: 0.0
+    position_last_element:
+        x: 18.0
+        y: 0.0
+        z: 3.0

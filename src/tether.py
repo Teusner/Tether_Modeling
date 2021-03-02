@@ -8,6 +8,8 @@ from scipy.optimize import fsolve
 import numpy as np
 import time
 
+import yaml
+
 from tether_element import TetherElement
 
 ### TODO
@@ -17,26 +19,23 @@ from tether_element import TetherElement
 # Using double linked list and exec {for i in range(10): exec("obj{} = Stock(name, price)".format(i))} to instantiate TetherElements
 
 class Tether:
-    def __init__(self, L, n, config_filename):
-        # Tether parameters
-        self.n = n
-        self.L = L
-        self.config_filename = config_filename
+    def __init__(self, Tether_config_filename, TetherElement_config_filename):
+        # Tether config files
+        self.Tether_config_filename = Tether_config_filename
+        self.TetherElement_config_filename = TetherElement_config_filename
+
+        # Parsing configuration file
+        self.parse()
 
         # List of TetherElements
         self.elements = []
-
-        # TetherElements parameters
-        self.element_length = self.L / (self.n - 1)
-        self.element_mass = 5 * self.element_length
-        self.element_volume = np.pi*0.005**2*self.element_length
 
         # Extremities
         self.position_first = np.array([[10.], [0], [0.]])
         self.position_last = np.array([[18.], [0], [3.]])
 
         def f(p):
-            eq1 = p[0]*np.sinh((self.position_last[0, 0]+p[1])/p[0]) - p[0]*np.sinh((self.position_first[0, 0]+p[1])/p[0]) - self.L
+            eq1 = p[0]*np.sinh((self.position_last[0, 0]+p[1])/p[0]) - p[0]*np.sinh((self.position_first[0, 0]+p[1])/p[0]) - self.length
             eq2 = p[0]*np.cosh((self.position_first[0, 0]+p[1])/p[0]) + p[2] - self.position_first[1, 0]
             eq3 = p[0]*np.cosh((self.position_last[0, 0]+p[1])/p[0]) + p[2] - self.position_last[1, 0]
             return [eq1, eq2, eq3]
@@ -45,21 +44,21 @@ class Tether:
         # print(initial_parameters)
 
         def g(p, i):
-            eq1 = initial_parameters[0]*np.sinh((p[0]+initial_parameters[1])/initial_parameters[0]) - initial_parameters[0]*np.sinh((self.position_first[0, 0]+initial_parameters[1])/initial_parameters[0]) - i * self.L / (self.n)
+            eq1 = initial_parameters[0]*np.sinh((p[0]+initial_parameters[1])/initial_parameters[0]) - initial_parameters[0]*np.sinh((self.position_first[0, 0]+initial_parameters[1])/initial_parameters[0]) - i * self.length / (self.n)
             eq2 = initial_parameters[0]*np.cosh((p[0]+initial_parameters[1])/initial_parameters[0]) + initial_parameters[2] - p[2]
             eq3 = self.position_first[1, 0] + i * (self.position_last[1, 0] - self.position_first[1, 0]) / (self.n-1) - p[1]
             return [eq1, eq2, eq3]
 
         # Initialise positions for each TetherElements
-        self.elements.append(TetherElement(self.element_mass, self.element_length, self.element_volume, self.position_first, is_extremity=True, config_filename=self.config_filename))
+        self.elements.append(TetherElement(self.element_mass, self.element_length, self.element_volume, self.position_first, is_extremity=True, config_filename=self.TetherElement_config_filename))
         for i in range(1, self.n-1):
             position = fsolve(g, self.position_first, args=(i)).reshape(3, 1)
             # print(position.flatten())
-            self.elements.append(TetherElement(self.element_mass, self.element_length, self.element_volume, position, config_filename=self.config_filename))
-        self.elements.append(TetherElement(self.element_mass, self.element_length, self.element_volume, self.position_last, is_extremity=True, config_filename=self.config_filename))
+            self.elements.append(TetherElement(self.element_mass, self.element_length, self.element_volume, position, config_filename=self.TetherElement_config_filename))
+        self.elements.append(TetherElement(self.element_mass, self.element_length, self.element_volume, self.position_last, is_extremity=True, config_filename=self.TetherElement_config_filename))
 
         # Chaining elements
-        for i in range(1, n-1):
+        for i in range(1, self.n-1):
             self.elements[i].previous = self.elements[i-1]
             self.elements[i].next = self.elements[i+1]
 
@@ -70,8 +69,39 @@ class Tether:
         res = ""
         for e in self.elements:
             res += str(e)
-        return res        
+        return res
 
+    def parse(self):
+        with open(self.Tether_config_filename) as f:
+            parameters = yaml.load(f)
+
+            # Tether parameters parsing
+            self.length = parameters["Tether"]["length"]
+            self.n = parameters["Tether"]["n"]
+            self.linear_mass = parameters["Tether"]["linear_mass"]
+            self.linear_volume = parameters["Tether"]["linear_volume"]
+
+            # Environment parameters parsing
+            self.rho = parameters["Environment"]["rho"]
+            self.g = parameters["Environment"]["g"]
+
+            # First element parsing
+            x_first = parameters["Elements"]["position_first_element"]["x"]
+            y_first = parameters["Elements"]["position_first_element"]["y"]
+            z_first = parameters["Elements"]["position_first_element"]["z"]
+            self.position_first = np.array([[x_first], [y_first], [z_first]])
+
+            # Last element parsing
+            x_last = parameters["Elements"]["position_last_element"]["x"]
+            y_last = parameters["Elements"]["position_last_element"]["y"]
+            z_last = parameters["Elements"]["position_last_element"]["z"]
+            self.position_last = np.array([[x_last], [y_last], [z_last]])
+
+            # Other parameters processing
+            self.element_length = self.length / (self.n - 1)
+            self.element_mass = self.length * self.linear_mass / self.n
+            self.element_volume = self.length * self.linear_volume / self.n
+        
     def process(self, t0, tf, h):
         # Saving parameters
         self.t0, self.tf, self.h = t0, tf, h
@@ -344,7 +374,7 @@ class Tether:
 
 
 if __name__ == "__main__":
-    T = Tether(25, 11, "./config/TetherElement.yaml")
+    T = Tether( "./config/Tether.yaml", "./config/TetherElement.yaml")
     T.process(0, 30, 1/20)
 
     # fig_length_error, ax_length_error = T.monitor_length_error()
