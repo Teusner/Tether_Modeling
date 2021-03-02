@@ -12,7 +12,7 @@ import yaml
 
 from tether_element import TetherElement
 
-from initialization import *
+from initialization import get_catenary_coefficients, get_initial_position
 
 ### TODO
 # Fixing n / L / number of TetherElement per meters
