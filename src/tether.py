@@ -376,9 +376,9 @@ if __name__ == "__main__":
     T = Tether( "./config/Tether.yaml", "./config/TetherElement.yaml")
     T.process(0, 30, 1/20)
 
-    # fig_length_error, ax_length_error = T.monitor_length_error()
-    # fig_length, ax_length = T.monitor_angle()
-    # plt.show()
+    fig_length_error, ax_length_error = T.monitor_length_error()
+    fig_length, ax_length = T.monitor_angle()
+    plt.show()
 
     T.simulate()
     plt.show()

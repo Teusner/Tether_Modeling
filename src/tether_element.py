@@ -212,12 +212,4 @@ class TetherElement:
 
 
 if __name__ == "__main__":
-    t1 = TetherElement(1, 1, 1, np.array([[0], [0], [1]]))
-    t2 = TetherElement(1, 1, 1, np.array([[0], [0], [1]]))
-    t1.next = t2
-    t2.previous = t1
-    print(t1)
-    print(t2)
-
-    t1.load_parameters("./config/TetherElement.yaml")
-    print(t2.kp, t2.kd, t2.ki)
+    pass
