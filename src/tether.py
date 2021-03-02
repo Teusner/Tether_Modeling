@@ -40,7 +40,6 @@ class Tether:
             return [eq1, eq2, eq3]
 
         initial_parameters = fsolve(f, (1., (self.position_first[0, 0]+self.position_last[0, 0])/2, (self.position_first[1, 0]+self.position_last[1, 0])/2))
-        # print(initial_parameters)
 
         def g(p, i):
             eq1 = initial_parameters[0]*np.sinh((p[0]+initial_parameters[1])/initial_parameters[0]) - initial_parameters[0]*np.sinh((self.position_first[0, 0]+initial_parameters[1])/initial_parameters[0]) - i * self.length / (self.n)
@@ -373,7 +372,7 @@ class Tether:
 
 
 if __name__ == "__main__":
-    T = Tether( "./config/Tether.yaml", "./config/TetherElement.yaml")
+    T = Tether("./config/Tether.yaml", "./config/TetherElement.yaml")
     T.process(0, 30, 1/20)
 
     fig_length_error, ax_length_error = T.monitor_length_error()
