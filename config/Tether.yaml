@@ -13,11 +13,11 @@ Environment:
     g: 9.81
 
 Elements:
-    position_first_element:
+    position_head:
         x: 10.0
         y: 0.0
         z: 0.0
-    position_last_element:
+    position_tail:
         x: 18.0
         y: 0.0
         z: 3.0
