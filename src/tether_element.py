@@ -49,9 +49,6 @@ class TetherElement:
         # Support vector for torque
         self.v = np.array([[0], [0], [1]])
 
-        # Proportionnal resistant torque
-        self.Tp = 50.
-
         # Loading_parameters
         self.parse(TetherElement_config_filename)
 
@@ -70,18 +67,23 @@ class TetherElement:
         with open(config_filename) as f:
             parameters = yaml.load(f)
 
-            # Force coefficients
-            self.kp = parameters["Length"]["Kp"]
-            self.kd = parameters["Length"]["Kd"]
-            self.ki = parameters["Length"]["Ki"]
+            # Length coefficients
+            self.length_Kp = parameters["Length"]["Kp"]
+            self.length_Kd = parameters["Length"]["Kd"]
+            self.length_Ki = parameters["Length"]["Ki"]
 
-            # Torque coefficients
-            self.Tp = parameters["Torque"]["Kp"]
-            self.Td = parameters["Torque"]["Kd"]
-            self.Ti = parameters["Torque"]["Ki"]
+            # Bend coefficients
+            self.twist_Kp = parameters["Twist"]["Kp"]
+            self.twist_Kd = parameters["Twist"]["Kd"]
+            self.twist_Ki = parameters["Twist"]["Ki"]
+
+            # Bend coefficients
+            self.bend_Kp = parameters["Bend"]["Kp"]
+            self.bend_Kd = parameters["Bend"]["Kd"]
+            self.bend_Ki = parameters["Bend"]["Ki"]
 
             # Drag coefficient
-            self.f = parameters["Drag"]["f"]
+            self.drag_f = parameters["Drag"]["f"]
 
     def get_position(self, i=None):
         if i is not None:
@@ -143,7 +145,7 @@ class TetherElement:
             de = (lm - self.previous_length) / h
 
             # Processing force
-            force = - ( self.kp * e + self.kd * de + self.ki * self.E_previous) * u
+            force = - ( self.length_Kp * e + self.length_Kd * de + self.length_Ki * self.E_previous) * u
 
             # Updating values
             self.previous_length = lm
@@ -166,7 +168,7 @@ class TetherElement:
             de = (lm - self.next_length) / h
 
             # Processing force
-            force = - ( self.kp * e + self.kd * de + self.ki * self.E_next) * u
+            force = - ( self.length_Kp * e + self.length_Kd * de + self.length_Ki * self.E_next) * u
 
             # Updating values
             self.next_length = lm
@@ -176,21 +178,19 @@ class TetherElement:
             return np.zeros((4, 1))
 
     def Ff(self):
-        force = - self.f * self.get_velocity()*np.abs(self.get_velocity())
+        force = - self.drag_f * self.get_velocity()*np.abs(self.get_velocity())
         return np.vstack((force, np.zeros((1, 1))))
 
     def Fr_prev(self):
         if self.previous is None:
             return np.zeros((4, 1))
-        kp = 2.
-        torque = - kp * 2 * np.arctan(np.tan((self.get_angle() - self.previous.get_angle())/2))
+        torque = - self.twist_Kp * 2 * np.arctan(np.tan((self.get_angle() - self.previous.get_angle())/2))
         return np.vstack((np.zeros((3, 1)), torque))
     
     def Fr_next(self):
         if self.next is None:
             return np.zeros((4, 1))
-        kp = 2.
-        torque = kp * 2 * np.arctan(np.tan((self.next.get_angle() - self.get_angle())/2))
+        torque = self.twist_Kp * 2 * np.arctan(np.tan((self.next.get_angle() - self.get_angle())/2))
         return np.vstack((np.zeros((3, 1)), torque))
 
     def Fs(self, h):

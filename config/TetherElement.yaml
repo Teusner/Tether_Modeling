@@ -6,8 +6,14 @@ Length:
     Kd: 6.0
     Ki: 100.0
 
-# Torque coefficients for rigidity
-Torque:
+# Torque coefficients for twist
+Twist:
+    Kp: 2.
+    Kd: 0.
+    Ki: 0.
+
+# Torque coefficients for bend
+Bend:
     Kp: 0.
     Kd: 0.
     Ki: 0.
