@@ -11,7 +11,7 @@ class TetherElement:
     g = 9.81
     rho = 1000
 
-    def __init__(self, mass, length, volume, position, angle, TetherElement_config_filename, is_extremity=False):
+    def __init__(self, mass, length, volume, state, TetherElement_config_filename, is_extremity=False):
         # UUID and pointer to the neighbors TetherElements
         self.uuid = uuid.uuid4()
         self.previous = None
@@ -25,8 +25,7 @@ class TetherElement:
 
         # State vector of the TetherElement [x, y, z, theta, vx, vy, vz, vtheta].T
         X = np.zeros((8, 1), dtype=np.float64)
-        X[:3] = position
-        X[3] = angle
+        X[:4] = state
 
         # State vector history
         self.state_history = [X]
