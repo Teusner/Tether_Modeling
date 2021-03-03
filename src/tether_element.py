@@ -36,7 +36,7 @@ class TetherElement:
         self.Ep = [0.]
 
         # Mask to use forces
-        self.forces_mask = np.array([True, True, True, True, True, True, True])
+        self.forces_mask = np.array([True, True, True, True, True, True, True, True])
         self.acceleration_limit = 1e4
 
         # Coefficient for the behavioral model
@@ -110,7 +110,7 @@ class TetherElement:
 
     def step(self, h):
         # Compute acceleration
-        forces = np.hstack((self.Fg(), self.Fb(), self.Ft_prev(h),  self.Ft_next(h), self.Ff(), self.Fs(h), self.f_r()))
+        forces = np.hstack((self.Fg(), self.Fb(), self.Ft_prev(h),  self.Ft_next(h), self.Ff(), self.Fs(h), self.Fr_prev(), self.Fr_next()))
         forces = np.sum(forces[:, self.forces_mask], axis=1).reshape(4, 1)
         acceleration = np.clip(forces / self.mass, -self.acceleration_limit, self.acceleration_limit)
 
@@ -180,15 +180,18 @@ class TetherElement:
         force = - self.f * self.get_velocity()*np.abs(self.get_velocity())
         return np.vstack((force, np.zeros((1, 1))))
 
-    def f_r(self):
+    def Fr_prev(self):
         if self.previous is None:
             return np.zeros((4, 1))
-        
-        # Error computing
-        kp = 5.0
-        e = (self.get_angle() - self.previous.get_angle() + np.pi) % (2 * np.pi) - np.pi
-        #e = 2*np.arctan(np.tan((self.get_angle() - self.previous.get_angle())/2))
-        torque = kp * e
+        kp = 2.
+        torque = - kp * 2 * np.arctan(np.tan((self.get_angle() - self.previous.get_angle())/2))
+        return np.vstack((np.zeros((3, 1)), torque))
+    
+    def Fr_next(self):
+        if self.next is None:
+            return np.zeros((4, 1))
+        kp = 2.
+        torque = kp * 2 * np.arctan(np.tan((self.next.get_angle() - self.get_angle())/2))
         return np.vstack((np.zeros((3, 1)), torque))
 
     def Fs(self, h):

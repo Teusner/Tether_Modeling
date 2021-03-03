@@ -23,7 +23,7 @@ class Tether:
 
         # Double linked list of TetherElement
         self.head = TetherElement(self.element_mass, self.element_length, self.element_volume, self.position_head, 2 * np.pi * (np.random.random()-0.5), TetherElement_config_filename, is_extremity=True)
-        self.tail = TetherElement(self.element_mass, self.element_length, self.element_volume, self.position_tail, 2 * np.pi * (np.random.random()-0.5), TetherElement_config_filename, is_extremity=True)
+        self.tail = TetherElement(self.element_mass, self.element_length, self.element_volume, self.position_tail, 0. , TetherElement_config_filename, is_extremity=True)
 
         # Processing initialization parameters
         initial_parameters = get_catenary_coefficients(self.position_head, self.position_tail, self.length)        
@@ -32,7 +32,7 @@ class Tether:
         self.previous_element = self.head
         for i in range(1, self.n-1):
             position = get_initial_position(self.position_head, self.position_tail, self.length, self.n, i, initial_parameters)
-            angle = 2 * np.pi * (np.random.random()-0.5)
+            angle = 0.
             exec("self.TetherElement{} = TetherElement(self.element_mass, self.element_length, self.element_volume, position, angle, TetherElement_config_filename)".format(i))
             exec("self.TetherElement{}.previous = self.previous_element".format(i))
             exec("self.previous_element.next = self.TetherElement{}".format(i))
@@ -162,7 +162,7 @@ class Tether:
             total_angle.append(e.get_angles())
             e = e.next
         
-        total_angle = np.squeeze(np.asarray(total_angle))[:, :-1]
+        total_angle = (np.squeeze(np.asarray(total_angle))[:, :-1] + np.pi ) % (2 * np.pi) - np.pi
 
         ax_angle.plot(self.t, total_angle.T, color="grey")
 
