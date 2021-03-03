@@ -38,13 +38,16 @@ class TetherElement:
         self.forces_mask = np.array([True, True, True, True, True, True, True, True])
         self.acceleration_limit = 1e4
 
-        # Coefficient for the behavioral model
-        self.Kp, self.Kd, self.Ki = 0., 0., 0.
+        # Length variables
         self.previous_length, self.next_length = self.length, self.length
         self.E_previous, self.E_next = 0., 0.
 
-        # Integrator for torque
-        self.E_torque = 0.
+        # Twist variables
+        self.previous_twist, self.next_twist = 0., 0.
+
+        # Bend variables
+        self.previous_bend, self.next_bend = self.length, self.length
+        self.E_previous, self.E_next = 0., 0.
 
         # Support vector for torque
         self.v = np.array([[0], [0], [1]])
@@ -111,13 +114,12 @@ class TetherElement:
 
     def step(self, h):
         # Compute acceleration
-        forces = np.hstack((self.Fg(), self.Fb(), self.Ft_prev(h),  self.Ft_next(h), self.Ff(), self.Fs(h), self.Fr_prev(), self.Fr_next()))
+        forces = np.hstack((self.Fg(), self.Fb(), self.Ft_prev(h),  self.Ft_next(h), self.Ff(), self.Fs(h), self.Fr_prev(h), self.Fr_next(h)))
         forces = np.sum(forces[:, self.forces_mask], axis=1).reshape(4, 1)
         acceleration = np.clip(forces / self.mass, -self.acceleration_limit, self.acceleration_limit)
 
         if self.is_extremity:
             U = -acceleration
-            U[3, 0] = 0
         else:
             U = np.zeros((4, 1))
 
@@ -181,16 +183,22 @@ class TetherElement:
         force = - self.drag_f * self.get_velocity()*np.abs(self.get_velocity())
         return np.vstack((force, np.zeros((1, 1))))
 
-    def Fr_prev(self):
+    def Fr_prev(self, h):
         if self.previous is None:
             return np.zeros((4, 1))
-        torque = - self.twist_Kp * 2 * np.arctan(np.tan((self.get_angle() - self.previous.get_angle())/2))
+        e = 2 * np.arctan(np.tan((self.get_angle() - self.previous.get_angle())/2))
+        de = (e - self.previous_twist) / h
+        torque = - (self.twist_Kp * e + self.twist_Kd * de)
+        self.previous_twist = e
         return np.vstack((np.zeros((3, 1)), torque))
     
-    def Fr_next(self):
+    def Fr_next(self, h):
         if self.next is None:
             return np.zeros((4, 1))
-        torque = self.twist_Kp * 2 * np.arctan(np.tan((self.next.get_angle() - self.get_angle())/2))
+        e = 2 * np.arctan(np.tan((self.next.get_angle() - self.get_angle())/2))
+        de = (e - self.next_twist) / h
+        torque = self.twist_Kp * e + self.twist_Kd * de
+        self.next_twist = e
         return np.vstack((np.zeros((3, 1)), torque))
 
     def Fs(self, h):

@@ -163,6 +163,7 @@ class Tether:
         while e.next is not None:
             total_angle.append(e.get_angles())
             e = e.next
+        total_angle.append(e.get_angles())
         
         total_angle = (np.squeeze(np.asarray(total_angle))[:, :-1] + np.pi ) % (2 * np.pi) - np.pi
 

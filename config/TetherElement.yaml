@@ -8,8 +8,8 @@ Length:
 
 # Torque coefficients for twist
 Twist:
-    Kp: 2.
-    Kd: 0.
+    Kp: 50.
+    Kd: 100.
     Ki: 0.
 
 # Torque coefficients for bend
