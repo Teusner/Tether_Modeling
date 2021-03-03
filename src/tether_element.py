@@ -40,7 +40,7 @@ class TetherElement:
 
         # Length variables
         self.previous_length, self.next_length = self.length, self.length
-        self.E_previous, self.E_next = 0., 0.
+        self.E_previous, self.E_next = -90., -90.
 
         # Twist variables
         self.previous_twist, self.next_twist = 0., 0.
@@ -201,7 +201,8 @@ class TetherElement:
         self.next_twist = e
         return np.vstack((np.zeros((3, 1)), torque))
 
-    def Fs(self, h):        
+    def Fs(self, h):
+        return np.zeros((4, 1))
         if self.next is None or self.previous is None:
             return np.zeros((4, 1))
         

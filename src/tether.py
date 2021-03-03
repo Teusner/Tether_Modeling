@@ -363,7 +363,7 @@ class Tether:
 
 if __name__ == "__main__":
     T = Tether("./config/Tether.yaml", "./config/TetherElement.yaml")
-    T.process(0, 20, 1/20)
+    T.process(0, 40, 1/20)
 
     fig_angle, ax_angle = T.monitor_length_error()
     plt.show()

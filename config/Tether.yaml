@@ -4,8 +4,8 @@
 Tether:
     length: 25
     n: 11
-    linear_mass: 10
-    linear_volume: 0.001
+    linear_mass: 5
+    linear_volume: 0.0005
 
 # Environment parameters
 Environment:
