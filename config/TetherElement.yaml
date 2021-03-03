@@ -2,9 +2,9 @@
 
 # Length coefficients for links
 Length:
-    Kp: 200.0
-    Kd: 6.0
-    Ki: 100.0
+    Kp: 150.0
+    Kd: 4.0
+    Ki: 14.0
 
 # Torque coefficients for twist
 Twist:
@@ -19,4 +19,4 @@ Bend:
     Ki: 0.
 
 Drag:
-    f: 15.
+    f: 30.

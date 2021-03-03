@@ -46,8 +46,8 @@ class TetherElement:
         self.previous_twist, self.next_twist = 0., 0.
 
         # Bend variables
-        self.previous_bend, self.next_bend = self.length, self.length
-        self.E_previous, self.E_next = 0., 0.
+        self.bend = 0.
+        self.E_bend = 0.
 
         # Support vector for torque
         self.v = np.array([[0], [0], [1]])
@@ -201,25 +201,25 @@ class TetherElement:
         self.next_twist = e
         return np.vstack((np.zeros((3, 1)), torque))
 
-    def Fs(self, h):
-        return np.zeros((4, 1))
-        # if self.next is None or self.previous is None:
-        #     return np.zeros((3, 1))
+    def Fs(self, h):        
+        if self.next is None or self.previous is None:
+            return np.zeros((4, 1))
         
-        # u_previous = (self.previous.get_position() - self.get_position())
-        # u_next = (self.next.get_position() - self.get_position())
+        u_previous = (self.previous.get_position() - self.get_position())
+        u_next = (self.next.get_position() - self.get_position())
 
-        # value = np.clip((u_next.T @ u_previous) / (np.linalg.norm(self.previous.get_position() - self.get_position()) * np.linalg.norm((self.next.get_position() - self.get_position()))), -1.0, 1.0)
-        # e = (np.arccos(value) - np.pi/2) / (np.pi / 2)
-        # value = np.clip((u_next + h*(self.next.get_velocity() - self.get_velocity())).T @ (u_previous+h*(self.previous.get_velocity() - self.get_velocity())), -1.0, 1.0)
-        # de = (np.arccos(value) - e) / h
-        # self.E_torque += h*e
+        value = np.clip((u_next.T @ u_previous) / (np.linalg.norm(self.previous.get_position() - self.get_position()) * np.linalg.norm((self.next.get_position() - self.get_position()))), -1.0, 1.0)
+        e = (np.arccos(value) - np.pi/2) / (np.pi / 2)
+        value = np.clip((u_next + h*(self.next.get_velocity() - self.get_velocity())).T @ (u_previous+h*(self.previous.get_velocity() - self.get_velocity())), -1.0, 1.0)
+        de = (np.arccos(value) - e) / h
+        self.E_bend += h*e
 
-        # if np.allclose((u_previous + u_next), np.zeros((3, 1))):
-        #     return np.zeros((3, 1))
-        # else:
-        #     self.v = (u_previous + u_next) / np.linalg.norm(u_previous + u_next)
-        #     return - (self.Tp*e + self.Td*de + self.Ti*self.E_torque) * self.v
+        if np.allclose((u_previous + u_next), np.zeros((3, 1))):
+            return np.zeros((4, 1))
+        else:
+            self.v = (u_previous + u_next) / np.linalg.norm(u_previous + u_next)
+            force = - (self.bend_Kp * e + self.bend_Kd * de + self.bend_Ki * self.E_bend) * self.v
+            return np.vstack((force, np.zeros((1, 1))))
 
     def dW(self, h):
         W = self.get_velocity().T @ np.hstack((self.Fg(), self.Fb(), self.Ft_prev(h), self.Ft_next(h), self.Ff(), self.Fs(h)))[:3]
