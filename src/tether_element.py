@@ -2,9 +2,6 @@ import numpy as np
 import uuid
 import yaml
 
-### TODO
-# Cleaning the force mask
-# Cleaning config.yaml
 
 class TetherElement:
     # Physical constants of the system
