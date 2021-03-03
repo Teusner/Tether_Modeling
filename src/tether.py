@@ -22,8 +22,8 @@ class Tether:
         self.parse(Tether_config_filename)
 
         # Double linked list of TetherElement
-        self.head = TetherElement(self.element_mass, self.element_length, self.element_volume, self.position_head, TetherElement_config_filename, is_extremity=True)
-        self.tail = TetherElement(self.element_mass, self.element_length, self.element_volume, self.position_tail, TetherElement_config_filename, is_extremity=True)
+        self.head = TetherElement(self.element_mass, self.element_length, self.element_volume, self.position_head, 2 * np.pi * (np.random.random()-0.5), TetherElement_config_filename, is_extremity=True)
+        self.tail = TetherElement(self.element_mass, self.element_length, self.element_volume, self.position_tail, 2 * np.pi * (np.random.random()-0.5), TetherElement_config_filename, is_extremity=True)
 
         # Processing initialization parameters
         initial_parameters = get_catenary_coefficients(self.position_head, self.position_tail, self.length)        
@@ -32,7 +32,8 @@ class Tether:
         self.previous_element = self.head
         for i in range(1, self.n-1):
             position = get_initial_position(self.position_head, self.position_tail, self.length, self.n, i, initial_parameters)
-            exec("self.TetherElement{} = TetherElement(self.element_mass, self.element_length, self.element_volume, position, TetherElement_config_filename)".format(i))
+            angle = 2 * np.pi * (np.random.random()-0.5)
+            exec("self.TetherElement{} = TetherElement(self.element_mass, self.element_length, self.element_volume, position, angle, TetherElement_config_filename)".format(i))
             exec("self.TetherElement{}.previous = self.previous_element".format(i))
             exec("self.previous_element.next = self.TetherElement{}".format(i))
             exec("self.previous_element = self.TetherElement{}".format(i))
@@ -167,7 +168,7 @@ class Tether:
 
         m, std = np.mean(total_angle, axis=0), np.std(total_angle, axis=0)
         ax_angle.fill_between(self.t, m - 3*std, m + 3*std, facecolor='teal', alpha=0.4, label=r"$3.\sigma$ area")
-        ax_angle.plot(self.t, m, color="crimson", linewidth=3, label="mean of lengths")
+        ax_angle.plot(self.t, m, color="crimson", linewidth=3, label="mean of angles")
         ax_angle.plot(self.t, m - 3*std, color="teal", linewidth=2)
         ax_angle.plot(self.t, m + 3*std, color="teal", linewidth=2)
 
@@ -361,8 +362,7 @@ if __name__ == "__main__":
     T = Tether("./config/Tether.yaml", "./config/TetherElement.yaml")
     T.process(0, 30, 1/20)
 
-    fig_length_error, ax_length_error = T.monitor_length_error()
-    fig_length, ax_length = T.monitor_length()
+    fig_angle, ax_angle = T.monitor_angle()
     plt.show()
 
     T.simulate()

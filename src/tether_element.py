@@ -11,7 +11,7 @@ class TetherElement:
     g = 9.81
     rho = 1000
 
-    def __init__(self, mass, length, volume, position, TetherElement_config_filename, is_extremity=False):
+    def __init__(self, mass, length, volume, position, angle, TetherElement_config_filename, is_extremity=False):
         # UUID and pointer to the neighbors TetherElements
         self.uuid = uuid.uuid4()
         self.previous = None
@@ -26,6 +26,7 @@ class TetherElement:
         # State vector of the TetherElement [x, y, z, theta, vx, vy, vz, vtheta].T
         X = np.zeros((8, 1), dtype=np.float64)
         X[:3] = position
+        X[3] = angle
 
         # State vector history
         self.state_history = [X]
@@ -35,7 +36,7 @@ class TetherElement:
         self.Ep = [0.]
 
         # Mask to use forces
-        self.forces_mask = np.array([True, True, True, True, True, True])
+        self.forces_mask = np.array([True, True, True, True, True, True, True])
         self.acceleration_limit = 1e4
 
         # Coefficient for the behavioral model
@@ -93,7 +94,7 @@ class TetherElement:
         if i is not None:
             return np.asarray(self.state_history[i])[3]
         else:
-            return np.asarray(self.state_history[-1])[33]
+            return np.asarray(self.state_history[-1])[3]
 
     def get_velocity(self):
         return np.asarray(self.state_history[-1])[4:7]
@@ -109,7 +110,7 @@ class TetherElement:
 
     def step(self, h):
         # Compute acceleration
-        forces = np.hstack((self.Fg(), self.Fb(), self.Ft_prev(h),  self.Ft_next(h), self.Ff(), self.Fs(h)))
+        forces = np.hstack((self.Fg(), self.Fb(), self.Ft_prev(h),  self.Ft_next(h), self.Ff(), self.Fs(h), self.f_r()))
         forces = np.sum(forces[:, self.forces_mask], axis=1).reshape(4, 1)
         acceleration = np.clip(forces / self.mass, -self.acceleration_limit, self.acceleration_limit)
 
@@ -180,11 +181,15 @@ class TetherElement:
         return np.vstack((force, np.zeros((1, 1))))
 
     def f_r(self):
-        kp = 1
+        if self.previous is None:
+            return np.zeros((4, 1))
+        
         # Error computing
-        e = self.get_angle() - self.previous.get_angle()
+        kp = 5.0
+        e = (self.get_angle() - self.previous.get_angle() + np.pi) % (2 * np.pi) - np.pi
+        #e = 2*np.arctan(np.tan((self.get_angle() - self.previous.get_angle())/2))
         torque = kp * e
-        return np.vstack((np.zeros(3, 1), torque))
+        return np.vstack((np.zeros((3, 1)), torque))
 
     def Fs(self, h):
         return np.zeros((4, 1))
