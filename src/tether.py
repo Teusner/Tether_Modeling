@@ -22,17 +22,18 @@ class Tether:
         self.parse(Tether_config_filename)
 
         # Double linked list of TetherElement
-        self.head = TetherElement(self.element_mass, self.element_length, self.element_volume, self.position_head, TetherElement_config_filename, is_extremity=True)
-        self.tail = TetherElement(self.element_mass, self.element_length, self.element_volume, self.position_tail, TetherElement_config_filename, is_extremity=True)
+        self.head = TetherElement(self.element_mass, self.element_length, self.element_volume, self.head_state, TetherElement_config_filename, is_extremity=True)
+        self.tail = TetherElement(self.element_mass, self.element_length, self.element_volume, self.tail_state, TetherElement_config_filename, is_extremity=True)
 
         # Processing initialization parameters
-        initial_parameters = get_catenary_coefficients(self.position_head, self.position_tail, self.length)        
+        initial_parameters = get_catenary_coefficients(self.head_state[:3], self.tail_state[:3], self.length)        
 
         # Initialise double linked list of TetherElement
         self.previous_element = self.head
         for i in range(1, self.n-1):
-            position = get_initial_position(self.position_head, self.position_tail, self.length, self.n, i, initial_parameters)
-            exec("self.TetherElement{} = TetherElement(self.element_mass, self.element_length, self.element_volume, position, TetherElement_config_filename)".format(i))
+            position = get_initial_position(self.head_state[:3], self.tail_state[:3], self.length, self.n, i, initial_parameters)
+            state = np.vstack((position, np.zeros((1, 1))))
+            exec("self.TetherElement{} = TetherElement(self.element_mass, self.element_length, self.element_volume, state, TetherElement_config_filename)".format(i))
             exec("self.TetherElement{}.previous = self.previous_element".format(i))
             exec("self.previous_element.next = self.TetherElement{}".format(i))
             exec("self.previous_element = self.TetherElement{}".format(i))
@@ -66,13 +67,15 @@ class Tether:
             x_first = parameters["Elements"]["position_head"]["x"]
             y_first = parameters["Elements"]["position_head"]["y"]
             z_first = parameters["Elements"]["position_head"]["z"]
-            self.position_head = np.array([[x_first], [y_first], [z_first]])
+            angle_first = parameters["Elements"]["position_head"]["angle"]
+            self.head_state = np.array([[x_first], [y_first], [z_first], [angle_first]])
 
             # Last element parsing
             x_last = parameters["Elements"]["position_tail"]["x"]
             y_last = parameters["Elements"]["position_tail"]["y"]
             z_last = parameters["Elements"]["position_tail"]["z"]
-            self.position_tail = np.array([[x_last], [y_last], [z_last]])
+            angle_last = parameters["Elements"]["position_tail"]["angle"]
+            self.tail_state = np.array([[x_last], [y_last], [z_last], [angle_last]])
 
             # Other parameters processing
             self.element_length = self.length / (self.n - 1)
@@ -161,13 +164,13 @@ class Tether:
             total_angle.append(e.get_angles())
             e = e.next
         
-        total_angle = np.squeeze(np.asarray(total_angle))[:, :-1]
+        total_angle = (np.squeeze(np.asarray(total_angle))[:, :-1] + np.pi ) % (2 * np.pi) - np.pi
 
         ax_angle.plot(self.t, total_angle.T, color="grey")
 
         m, std = np.mean(total_angle, axis=0), np.std(total_angle, axis=0)
         ax_angle.fill_between(self.t, m - 3*std, m + 3*std, facecolor='teal', alpha=0.4, label=r"$3.\sigma$ area")
-        ax_angle.plot(self.t, m, color="crimson", linewidth=3, label="mean of lengths")
+        ax_angle.plot(self.t, m, color="crimson", linewidth=3, label="mean of angles")
         ax_angle.plot(self.t, m - 3*std, color="teal", linewidth=2)
         ax_angle.plot(self.t, m + 3*std, color="teal", linewidth=2)
 
@@ -361,8 +364,7 @@ if __name__ == "__main__":
     T = Tether("./config/Tether.yaml", "./config/TetherElement.yaml")
     T.process(0, 30, 1/20)
 
-    fig_length_error, ax_length_error = T.monitor_length_error()
-    fig_length, ax_length = T.monitor_length()
+    fig_angle, ax_angle = T.monitor_angle()
     plt.show()
 
     T.simulate()
