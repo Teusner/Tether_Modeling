@@ -21,34 +21,31 @@ class Tether:
         # Parsing configuration file
         self.parse(Tether_config_filename)
 
-        # TetherElement config files
-        self.TetherElement_config_filename = TetherElement_config_filename
+        # Double linked list of TetherElement
+        self.head = TetherElement(self.element_mass, self.element_length, self.element_volume, self.position_head, TetherElement_config_filename, is_extremity=True)
+        self.tail = TetherElement(self.element_mass, self.element_length, self.element_volume, self.position_tail, TetherElement_config_filename, is_extremity=True)
 
-        # List of TetherElements
-        self.elements = []
+        # Processing initialization parameters
+        initial_parameters = get_catenary_coefficients(self.position_head, self.position_tail, self.length)        
 
-        initial_parameters = get_catenary_coefficients(self.position_first, self.position_last, self.length)        
-
-        # Initialise positions for each TetherElements
-        self.elements.append(TetherElement(self.element_mass, self.element_length, self.element_volume, self.position_first,self.TetherElement_config_filename,  is_extremity=True))
+        # Initialise double linked list of TetherElement
+        self.previous_element = self.head
         for i in range(1, self.n-1):
-            position = get_initial_position(self.position_first, self.position_last, self.length, self.n, i, initial_parameters)
-            # print(position.flatten())
-            self.elements.append(TetherElement(self.element_mass, self.element_length, self.element_volume, position, self.TetherElement_config_filename))
-        self.elements.append(TetherElement(self.element_mass, self.element_length, self.element_volume, self.position_last, self.TetherElement_config_filename, is_extremity=True))
-
-        # Chaining elements
-        for i in range(1, self.n-1):
-            self.elements[i].previous = self.elements[i-1]
-            self.elements[i].next = self.elements[i+1]
-
-        self.elements[0].next = self.elements[1]
-        self.elements[-1].previous = self.elements[-2]
+            position = get_initial_position(self.position_head, self.position_tail, self.length, self.n, i, initial_parameters)
+            exec("self.TetherElement{} = TetherElement(self.element_mass, self.element_length, self.element_volume, position, TetherElement_config_filename)".format(i))
+            exec("self.TetherElement{}.previous = self.previous_element".format(i))
+            exec("self.previous_element.next = self.TetherElement{}".format(i))
+            exec("self.previous_element = self.TetherElement{}".format(i))
+        exec("self.TetherElement{}.next = self.tail".format(i))
+        exec("self.tail.previous = self.TetherElement{}".format(i))
 
     def __str__(self):
         res = ""
-        for e in self.elements:
+        e = self.head
+        while e.next is not None:
             res += str(e)
+            e = e.next
+        res += str(e)
         return res
 
     def parse(self, config_filename):
@@ -66,16 +63,16 @@ class Tether:
             self.g = parameters["Environment"]["g"]
 
             # First element parsing
-            x_first = parameters["Elements"]["position_first_element"]["x"]
-            y_first = parameters["Elements"]["position_first_element"]["y"]
-            z_first = parameters["Elements"]["position_first_element"]["z"]
-            self.position_first = np.array([[x_first], [y_first], [z_first]])
+            x_first = parameters["Elements"]["position_head"]["x"]
+            y_first = parameters["Elements"]["position_head"]["y"]
+            z_first = parameters["Elements"]["position_head"]["z"]
+            self.position_head = np.array([[x_first], [y_first], [z_first]])
 
             # Last element parsing
-            x_last = parameters["Elements"]["position_last_element"]["x"]
-            y_last = parameters["Elements"]["position_last_element"]["y"]
-            z_last = parameters["Elements"]["position_last_element"]["z"]
-            self.position_last = np.array([[x_last], [y_last], [z_last]])
+            x_last = parameters["Elements"]["position_tail"]["x"]
+            y_last = parameters["Elements"]["position_tail"]["y"]
+            z_last = parameters["Elements"]["position_tail"]["z"]
+            self.position_tail = np.array([[x_last], [y_last], [z_last]])
 
             # Other parameters processing
             self.element_length = self.length / (self.n - 1)
@@ -89,17 +86,21 @@ class Tether:
 
         t0 = time.time()
         for _ in self.t:
-            for e in self.elements:
+            e = self.head
+            while e.next is not None:
                 e.step(h)
+                e = e.next
+            e.step(h)
         print("\033[32mTotal process time : {} s\033[0m".format(time.time()-t0))
 
     def monitor_length(self):
         fig_length, ax_length = plt.subplots()
         total_length = []
 
-        for e in self.elements:
-            if e.next is not None:
-                total_length.append(np.linalg.norm(e.next.get_positions() - e.get_positions(), axis=1))
+        e = self.head
+        while e.next is not None:
+            total_length.append(np.linalg.norm(e.next.get_positions() - e.get_positions(), axis=1))
+            e = e.next
         
         total_length = np.squeeze(np.asarray(total_length))[:, :-1]
         ax_length.plot(self.t, total_length.T, color="grey")
@@ -128,9 +129,10 @@ class Tether:
         fig_length_error, ax_length_error = plt.subplots()
         total_length = []
 
-        for e in self.elements:
-            if e.next is not None:
-                total_length.append(np.linalg.norm(e.next.get_positions() - e.get_positions(), axis=1))
+        e = self.head
+        while e.next is not None:
+            total_length.append(np.linalg.norm(e.next.get_positions() - e.get_positions(), axis=1))
+            e = e.next
         
         total_length = np.squeeze(np.asarray(total_length))[:, :-1]
 
@@ -154,9 +156,10 @@ class Tether:
         fig_angle, ax_angle = plt.subplots()
         total_angle = []
 
-        for e in self.elements:
-            if e.next is not None:
-                total_angle.append(e.get_angles())
+        e = self.head
+        while e.next is not None:
+            total_angle.append(e.get_angles())
+            e = e.next
         
         total_angle = np.squeeze(np.asarray(total_angle))[:, :-1]
 
@@ -181,11 +184,12 @@ class Tether:
         fig_shape, ax_shape = plt.subplots()
         total_angle = []
 
-        for e in self.elements:
-            if e.previous is not None and e.next is not None:
-                u_previous = np.squeeze(np.asarray(e.previous.get_positions())[:-1] - np.asarray(e.get_positions())[:-1])
-                u_next = np.squeeze(np.asarray(e.next.get_positions())[:-1] - np.asarray(e.get_positions())[:-1])
-                total_angle.append(np.arccos(np.sum((u_previous*u_next) / (np.linalg.norm(u_previous) * np.linalg.norm(u_next)), axis=1)))
+        e = self.head.next
+        while e.next is not None:
+            u_previous = np.squeeze(np.asarray(e.previous.get_positions())[:-1] - np.asarray(e.get_positions())[:-1])
+            u_next = np.squeeze(np.asarray(e.next.get_positions())[:-1] - np.asarray(e.get_positions())[:-1])
+            total_angle.append(np.arccos(np.sum((u_previous*u_next) / (np.linalg.norm(u_previous) * np.linalg.norm(u_next)), axis=1)))
+            e = e.next
         
         total_angle = np.squeeze(np.asarray(total_angle))
 
@@ -212,9 +216,10 @@ class Tether:
         fig_ek, ax_ek = plt.subplots()
         total_ek = []
 
-        for e in self.elements:
-            if e.previous is not None and e.next is not None:
-                total_ek.append(e.Ek[:-1])
+        e = self.head.next
+        while e.next is not None:
+            total_ek.append(e.Ek[:-1])
+            e = e.next
 
         total_ek = np.asarray(total_ek)
         ax_ek.plot(self.t, total_ek.T, color="grey")
@@ -241,9 +246,10 @@ class Tether:
         fig_ep, ax_ep = plt.subplots()
         total_ep = []
 
-        for e in self.elements:
-            if e.previous is not None and e.next is not None:
-                total_ep.append(e.Ep[:-1])
+        e = self.head.next
+        while e.next is not None:
+            total_ep.append(e.Ep[:-1])
+            e = e.next
 
         total_ep = np.asarray(total_ep)
         ax_ep.plot(self.t, total_ep.T, color="grey")
@@ -271,10 +277,11 @@ class Tether:
         total_ek = []
         total_ep = []
 
-        for e in self.elements:
-            if e.previous is not None and e.next is not None:
-                total_ek.append(e.Ek[:-1])
-                total_ep.append(e.Ep[:-1])
+        e = self.head.next
+        while e.next is not None:
+            total_ek.append(e.Ek[:-1])
+            total_ep.append(e.Ep[:-1])
+            e = e.next
 
         total_ep = np.asarray(total_ep)
         total_ek = np.asarray(total_ek)
@@ -300,15 +307,6 @@ class Tether:
         plt.tight_layout()
         
         return fig_energy, ax_energy
-    
-    def get_arrow(self, theta):
-        x = np.cos(theta)
-        y = np.sin(theta)
-        z = 0
-        u = np.sin(2*theta)
-        v = np.sin(3*theta)
-        w = np.cos(3*theta)
-        return x,y,z,u,v,w
 
     def simulate(self, save=False, filename="tether.mp4"):
         # Attaching 3D axis to the figure 
@@ -343,11 +341,17 @@ class Tether:
 
     def animate(self, i):
         X, Y, Z, theta = [], [], [], []
-        for e in self.elements:
+        e = self.head
+        while e.next is not None:
             X.append(e.get_position(i)[0][0])
             Y.append(e.get_position(i)[1][0])
             Z.append(e.get_position(i)[2][0])
             theta.append(e.get_angle(i)[0])
+            e = e.next
+        X.append(e.get_position(i)[0][0])
+        Y.append(e.get_position(i)[1][0])
+        Z.append(e.get_position(i)[2][0])
+        theta.append(e.get_angle(i)[0])
         self.graph.set_data(np.asarray(X), np.asarray(Y))
         self.graph.set_3d_properties(np.asarray(Z))
         return self.graph,
@@ -358,7 +362,7 @@ if __name__ == "__main__":
     T.process(0, 30, 1/20)
 
     fig_length_error, ax_length_error = T.monitor_length_error()
-    fig_length, ax_length = T.monitor_angle()
+    fig_length, ax_length = T.monitor_length()
     plt.show()
 
     T.simulate()
