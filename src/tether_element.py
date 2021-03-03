@@ -40,7 +40,7 @@ class TetherElement:
 
         # Length variables
         self.previous_length, self.next_length = self.length, self.length
-        self.E_previous, self.E_next = -90., -90.
+        self.E_previous, self.E_next = 0., 0.
 
         # Twist variables
         self.previous_twist, self.next_twist = 0., 0.
