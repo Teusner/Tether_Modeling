@@ -31,8 +31,7 @@ class Tether:
         # Initialise double linked list of TetherElement
         self.previous_element = self.head
         for i in range(1, self.n-1):
-            position = get_initial_position(self.head_state[:3], self.tail_state[:3], self.length, self.n, i, initial_parameters)
-            state = np.vstack((position, np.zeros((1, 1))))
+            state = get_initial_position(self.head_state, self.tail_state, self.length, self.n, i, initial_parameters)
             exec("self.TetherElement{} = TetherElement(self.element_mass, self.element_length, self.element_volume, state, TetherElement_config_filename)".format(i))
             exec("self.TetherElement{}.previous = self.previous_element".format(i))
             exec("self.previous_element.next = self.TetherElement{}".format(i))
@@ -365,7 +364,8 @@ if __name__ == "__main__":
     T = Tether("./config/Tether.yaml", "./config/TetherElement.yaml")
     T.process(0, 60, 1/20)
 
-    fig_angle, ax_angle = T.monitor_length_error()
+    fig_length, ax_length = T.monitor_length()
+    fig_length_error, ax_length_error = T.monitor_length_error()
     plt.show()
 
     T.simulate()
