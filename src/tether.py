@@ -11,10 +11,8 @@ from initialization import get_catenary_coefficients, get_initial_position
 
 
 ### TODO
-# Fixing n / L / number of TetherElement per meters
 # Adding extermities forces monitoring to see forces which are going to be applied to the MMO
 # Enhance visual representation
-# Using double linked list and exec {for i in range(10): exec("obj{} = Stock(name, price)".format(i))} to instantiate TetherElements
 
 class Tether:
     def __init__(self, Tether_config_filename, TetherElement_config_filename):
@@ -326,9 +324,9 @@ class Tether:
         self.ax.set_zlabel('Z')
 
         # Setting up axis limits and view
-        self.ax.set_xlim3d(10, 20)
-        self.ax.set_ylim3d(-6, 6)
-        self.ax.set_zlim3d(-15, 5)
+        self.ax.set_xlim3d([10, 20])
+        self.ax.set_ylim3d([-5, 5])
+        self.ax.set_zlim3d([-15, 5])
         self.ax.view_init(elev=20, azim=-50)
 
         # Creating n line object for each TetherElement
@@ -357,12 +355,13 @@ class Tether:
         theta.append(e.get_angle(i)[0])
         self.graph.set_data(np.asarray(X), np.asarray(Y))
         self.graph.set_3d_properties(np.asarray(Z))
+
         return self.graph,
 
 
 if __name__ == "__main__":
     T = Tether("./config/Tether.yaml", "./config/TetherElement.yaml")
-    T.process(0, 60, 1/20)
+    T.process(0, 30, 1/20)
 
     fig_length, ax_length = T.monitor_length()
     fig_length_error, ax_length_error = T.monitor_length_error()

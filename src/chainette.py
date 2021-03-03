@@ -21,13 +21,13 @@ def g(p, i):
 
 if __name__ == "__main__":
     # Catenary parameters
-    L = 10
-    x1, y1 = 0, 0
-    x2, y2 = 6, 3
-    n = 10
+    L = 25
+    x1, y1 = 11, 2
+    x2, y2 = 18, -2
+    n = 25
 
     # Getting catenary parameters
-    a, c1, c2 =  fsolve(f, (0.8, (x1+x2)/2, (y1+y2)/2), factor=0.1)
+    a, c1, c2 =  fsolve(f, (1, -(x1+x2)/2, (y1+y2)/2), factor=0.1)
     print("a: {}, c1: {}, c2: {}".format(a, c1, c2))
 
     # Plotting the catenary curve
