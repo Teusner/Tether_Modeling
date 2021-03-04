@@ -19,7 +19,7 @@ def initial_position(p, p1, pn, L, n, i, initial_parameters):
 
 def get_initial_position(p1, pn, L, n, i, initial_parameters):
     rmax = np.linalg.norm(pn[:2] - p1[:2])
-    state = fsolve(initial_position, (rmax / 2, pn[1, 0]-pn[0, 0], pn[3, 0]-p1[3, 0]), args=(p1, pn, L, n, i, initial_parameters)).reshape(3, 1)
+    state = fsolve(initial_position, (rmax*i/n, pn[1, 0]-pn[0, 0], pn[3, 0]-p1[3, 0]), args=(p1, pn, L, n, i, initial_parameters)).reshape(3, 1)
     theta = np.arctan2(pn[1] - p1[1], pn[0] - p1[0])
     x = np.cos(theta) * state[0] + p1[0]
     y = np.sin(theta) * state[0] + p1[1]
