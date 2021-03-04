@@ -17,7 +17,7 @@ Elements:
         x: 11.0
         y: 0.
         z: 2.0
-        angle: 1.0
+        angle: 10.0
     position_tail:
         x: 18.0
         y: 3.

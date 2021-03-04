@@ -183,7 +183,7 @@ class TetherElement:
     def Fr_prev(self, h):
         if self.previous is None:
             return np.zeros((4, 1))
-        e = 2 * np.arctan(np.tan((self.get_angle() - self.previous.get_angle())/2))
+        e = self.get_angle() - self.previous.get_angle()
         de = (e - self.previous_twist) / h
         torque = - (self.twist_Kp * e + self.twist_Kd * de)
         self.previous_twist = e
@@ -192,14 +192,14 @@ class TetherElement:
     def Fr_next(self, h):
         if self.next is None:
             return np.zeros((4, 1))
-        e = 2 * np.arctan(np.tan((self.next.get_angle() - self.get_angle())/2))
+        e = self.next.get_angle() - self.get_angle()
         de = (e - self.next_twist) / h
         torque = self.twist_Kp * e + self.twist_Kd * de
         self.next_twist = e
         return np.vstack((np.zeros((3, 1)), torque))
 
     def Fs(self, h):
-        return np.zeros((4, 1))
+        # return np.zeros((4, 1))
         if self.next is None or self.previous is None:
             return np.zeros((4, 1))
         
