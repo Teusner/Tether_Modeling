@@ -12,14 +12,19 @@ def get_catenary_coefficients(p1, pn, length):
 
 def initial_position(p, p1, pn, L, n, i, initial_parameters):
     eq1 = initial_parameters[0]*np.sinh((p[0]+initial_parameters[1])/initial_parameters[0]) - initial_parameters[0]*np.sinh((p1[0, 0]+initial_parameters[1])/initial_parameters[0]) - i * L / n
-    eq2 = p1[1, 0] + i * (pn[1, 0] - p1[1, 0]) / (n - 1) - p[1]
+    eq2 = p1[1, 0] - p[1]
     eq3 = initial_parameters[0]*np.cosh((p[0]+initial_parameters[1])/initial_parameters[0]) + initial_parameters[2] - p[2]
     eq4 = p1[3, 0] + i * (pn[3, 0] - p1[3, 0]) / (n - 1) - p[3]
     return [eq1, eq2, eq3, eq4]
 
 def get_initial_position(p1, pn, L, n, i, initial_parameters):
-    position = fsolve(initial_position, (p1 + pn) / 2, args=(p1, pn, L, n, i, initial_parameters))
-    return position.reshape(4, 1)
+    state = fsolve(initial_position, (p1 + pn) / 2, args=(p1, pn, L, n, i, initial_parameters)).reshape(4, 1)
+    theta = np.arctan2(np.copy(pn[1] - p1[1]), np.copy(pn[0] - p1[0]))
+    print(theta)
+    x = np.cos(theta) * state[0]
+    y = np.sin(theta) * state[0]
+    state[:2] = np.array([x, y])
+    return state
 
 if __name__ == "__main__":
     pass
