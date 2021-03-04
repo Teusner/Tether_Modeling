@@ -19,11 +19,8 @@ def initial_position(p, p1, pn, L, n, i, initial_parameters):
 def get_initial_position(p1, pn, L, n, i, initial_parameters):
     state = fsolve(initial_position, (pn[0]-p1[0], pn[1]-pn[0], pn[3]-p1[3]), args=(p1, pn, L, n, i, initial_parameters)).reshape(3, 1)
     theta = np.arctan2(pn[1] - p1[1], pn[0] - p1[0])
-    
-    A = np.array([[np.cos(theta), - np.sin(theta), 0, 0], [np.sin(theta), np.cos(theta), 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
-    x = np.cos(theta) * state[0]
-    y = np.sin(theta) * state[0]
-    print(theta)
+    x = np.cos(theta) * (state[0] - p1[0]) + p1[0]
+    y = np.sin(theta) * (state[0] - p1[0]) + p1[1]
     return np.vstack((x, y, state[1:]))
 
 if __name__ == "__main__":
