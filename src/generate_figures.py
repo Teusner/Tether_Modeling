@@ -15,23 +15,31 @@ if __name__ == "__main__":
     })
 
     # Simulation
-    T = Tether(25, 11, "./config/TetherElement.yaml")
-    T.process(0, 50, 1/20)
+    T = Tether("./config/Tether.yaml", "./config/TetherElement.yaml")
+    T.process(0, 40, 1/20)
 
     # Length figure
     fig_length, ax_length = T.monitor_length()
+    fig_length.set_size_inches(w=3.5, h=2.8)
+    plt.tight_layout()
     plt.savefig('./documentation/plots/length.pgf')
 
     # Relative error figure
     fig_length_error, ax_length_error = T.monitor_length_error()
+    fig_length_error.set_size_inches(w=3.5, h=2.8)
+    plt.tight_layout()
     plt.savefig('./documentation/plots/error_length.pgf')
 
     # Kinetic energy figure
     fig_ek, ax_ek = T.monitor_kinetic_energy()
+    fig_ek.set_size_inches(w=3.5, h=2.8)
+    plt.tight_layout()
     plt.savefig('./documentation/plots/kinetic_energy.pgf')
 
     # Potential energy figure
     fig_ep, ax_ep = T.monitor_potential_energy()
+    fig_ep.set_size_inches(w=3.5, h=2.8)
+    plt.tight_layout()
     plt.savefig('./documentation/plots/potential_energy.pgf')    
 
     # Energy figure
@@ -40,6 +48,8 @@ if __name__ == "__main__":
 
     # Angle figure
     fig_angle, ax_angle = T.monitor_angle()
+    fig_angle.set_size_inches(w=3.5, h=2.8)
+    plt.tight_layout()
     plt.savefig('./documentation/plots/angle.pgf')
 
     # Simulation figure

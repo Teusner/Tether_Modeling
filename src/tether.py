@@ -119,9 +119,6 @@ class Tether:
         ax_length.set_ylabel(r"Length (in $m$)")
         ax_length.set_xlim(self.t0, self.tf)
         ax_length.legend()
-
-        fig_length.set_size_inches(w=3.5, h=2.8)
-        plt.tight_layout()
         
         return fig_length, ax_length
 
@@ -146,9 +143,6 @@ class Tether:
         ax_length_error.set_xlabel(r"Time (in $s$)")
         ax_length_error.set_ylabel("Relative error (in %)")
         ax_length_error.set_xlim(self.t0, self.tf)
-
-        fig_length_error.set_size_inches(w=3.5, h=2.8)
-        plt.tight_layout()
 
         return fig_length_error, ax_length_error
 
@@ -238,9 +232,6 @@ class Tether:
         ax_ek.set_xlim(self.t0, self.tf)
         ax_ek.legend()
 
-        fig_ek.set_size_inches(w=3.5, h=2.8)
-        plt.tight_layout()
-
         return fig_ek, ax_ek
 
     def monitor_potential_energy(self):
@@ -267,9 +258,6 @@ class Tether:
         ax_ep.set_ylabel(r"Energy (in $J$)")
         ax_ep.set_xlim(self.t0, self.tf)
         ax_ep.legend()
-
-        fig_ep.set_size_inches(w=3.5, h=2.8)
-        plt.tight_layout()
         
         return fig_ep, ax_ep
 
@@ -303,9 +291,6 @@ class Tether:
         ax_energy.set_ylabel(r"Energy (in $J$)")
         ax_energy.set_xlim(self.t0, self.tf)
         ax_energy.legend()
-
-        fig_energy.set_size_inches(w=3.5, h=2.8)
-        plt.tight_layout()
         
         return fig_energy, ax_energy
 
