@@ -350,6 +350,8 @@ if __name__ == "__main__":
 
     fig_length, ax_length = T.monitor_length()
     fig_length_error, ax_length_error = T.monitor_length_error()
+    fig_angle, ax_angle = T.monitor_angle()
+    fig_shape, ax_shape = T.monitor_shape()
     plt.show()
 
     T.simulate()
